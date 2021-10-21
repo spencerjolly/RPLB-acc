@@ -32,10 +32,11 @@ def RPLB_acc_LC(lambda_0, tau_0, w_0, P, Psi_0, phi_2, phi_3, z_0, beta_0, tau_p
     pulse_prep = pulse_temp*np.exp(-1j*((phi_2/2)*(omega-omega_0)**2 + (phi_3/6)*(omega-omega_0)**3))
     z_omega = z_R*tau_p*(omega-omega_0)
 
-    z = np.empty(shape=(len(time)))
-    beta = np.empty(shape=(len(time)))
-    deriv1 = np.empty(shape=(len(time)))
-    deriv2 = np.empty(shape=(len(time)))
+    z = np.zeros(shape=(len(time)))
+    beta = np.zeros(shape=(len(time)))
+    deriv1 = np.zeros(shape=(len(time)))
+    deriv2 = np.zeros(shape=(len(time)))
+    KE = np.zeros(shape=(len(time)))
 
     beta[0] = beta_0
     z[0] = beta[0]*c*time[0]+z_0
@@ -66,6 +67,11 @@ def RPLB_acc_LC(lambda_0, tau_0, w_0, P, Psi_0, phi_2, phi_3, z_0, beta_0, tau_p
         else:
             z[k+1] = z[k] + dt*((1901/720)*deriv1[k]-(1387/360)*deriv1[k-1]+(109/30)*deriv1[k-2]-(637/360)*deriv1[k-3]+(251/720)*deriv1[k-4])
             beta[k+1] = beta[k] + dt*((1901/720)*deriv2[k]-(1387/360)*deriv2[k-1]+(109/30)*deriv2[k-2]-(637/360)*deriv2[k-3]+(251/720)*deriv2[k-4])
+            
+        KE[k+1] = ((1/np.sqrt(1-beta[k+1]**2))-1)*m_e*c**2/q_e
+        
+        #if (time[k] > 100*tau_0 and np.abs(np.mean(np.diff(KE[k-100:k+1])/(KE[k+1]*dt))) < 1e5):
+        #    k_stop = k+1
+        #    break
 
-    KE = ((1/np.sqrt(1-beta**2))-1)*m_e*c**2/q_e
     return KE[-1]
