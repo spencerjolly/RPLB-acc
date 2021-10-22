@@ -9,6 +9,8 @@ The function 'RPLB_acc_SC_2D.py' produces the same results as above for the case
 
 The script (jupyter notebook) 'Function_test.ipynb' shows simple examples of how to call all of the functions.
 
+The general model used to produce the fields simulated here can be found in Ref. [4] and in the repository RPLB-STC (https://github.com/spencerjolly/RPLB-STC).
+
 <b>Under development:</b>
 
 -functions do not currently automatically choose the starting time, ending time, or the temporal resolution
@@ -22,3 +24,5 @@ The script (jupyter notebook) 'Function_test.ipynb' shows simple examples of how
 [2] S. W. Jolly, Influence of longitudinal chromatism on vacuum acceleration by intense radially polarized laser beams, Optics Letters <b>44</b>, 1833–1836 (2019). https://www.osapublishing.org/ol/abstract.cfm?uri=ol-44-7-1833
 
 [3] S. W. Jolly, On the importance of frequency-dependent beam parameters for vacuum acceleration with few-cycle radially-polarized laser beams, Optics Letters <b>45</b>, 3865–3868 (2020). https://www.osapublishing.org/ol/abstract.cfm?uri=ol-45-14-3865 
+
+[4] S. W. Jolly, Focused fields of ultrashort radially polarized laser pulses having low-order spatiotemporal couplings, Physical Review A 103, 033512 (2021). https://journals.aps.org/pra/abstract/10.1103/PhysRevA.103.033512 (https://arxiv.org/abs/2012.02729)
