@@ -7,7 +7,7 @@ Functions 'RPLB_acc_LC.py' and 'RPLB_acc_LC_2D.py' produce the same results as a
 
 Functions 'RPLB_acc_g0.py' and 'RPLB_acc_g0_2D.py' produce the same results as above for the case where the laser has frequency-varying beam parameters according to the "Porras factor" g_0. These functions can reproduce results from Ref. [3].
 
-The function 'RPLB_acc_SC_2D.py' produces the same results as above for the case where the laser has spatial chirp (SC) in the focus. Because of the breaking of cylindrical symmetry there is no 1D scenario in this case. An electron starting initially off-axis will still gain transverse momentum and move off-axis.
+The function 'RPLB_acc_SC_2D.py' produces the same results as above for the case where the laser has spatial chirp (SC) in the focus. Because of the breaking of cylindrical symmetry there is no 1D scenario in this case. An electron starting initially on-axis will still gain transverse momentum and move off-axis.
 
 The script (jupyter notebook) 'Function_test.ipynb' shows simple examples of how to call all of the functions.
 
@@ -15,9 +15,9 @@ The general model used to produce the fields simulated here can be found in Ref.
 
 <b>Under development:</b>
 
--functions do not currently automatically choose the starting time, ending time, or the temporal resolution
+-functions do not currently automatically choose the starting time, ending time, or the temporal resolution of the finite difference method. This means that they will not work as-is for very high laser powers or very tight focusing (i.e. there is a limit on the laser intensity) and the associated high electron energy.
 
--The functions are all limited at the moment to Gaussian spectral profiles, effectively limiting the minimum pulse duration that can be properly simulated.
+-The functions are all limited at the moment to Gaussian spectral profiles, effectively limiting the minimum pulse duration that can be properly simulated. For example with a wavelength of 800 nm the lower limit of the pulse duration is around 4 fs.
 
 <b>References:</b>
 
