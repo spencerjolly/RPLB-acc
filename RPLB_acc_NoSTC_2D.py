@@ -117,4 +117,4 @@ def RPLB_acc_NoSTC_2D(lambda_0, tau_0, w_0, P, Psi_0, phi_2, z_0, r_0, beta_0):
         gamma[k+1] = 1/np.sqrt(1-(v_z[k+1]**2+v_r[k+1]**2)/c**2)
 
     KE = (gamma-1)*m_e*c**2/q_e
-    return time, z, r, KE[-1]
+    return time, z, r, v_z, v_r, KE[-1]
