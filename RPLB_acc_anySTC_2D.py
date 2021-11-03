@@ -2,7 +2,7 @@ import numpy as np
 from numba import jit
 
 @jit(nopython=True)
-def RPLB_acc_SC_2D(lambda_0, tau_0, w_0, P, Psi_0, phi_2, phi_3, z_0, x_0, beta_0, tau_t):
+def RPLB_acc_anySTC_2D(lambda_0, tau_0, w_00, P, Psi_0, phi_2, phi_3, z_0, x_0, beta_0, tau_p, tau_t, g_0):
     # initialize constants (SI units)
     c = 2.99792458e8 #speed of light
     m_e = 9.10938356e-31
@@ -12,11 +12,7 @@ def RPLB_acc_SC_2D(lambda_0, tau_0, w_0, P, Psi_0, phi_2, phi_3, z_0, x_0, beta_
     omega_0 = 2*np.pi*c/lambda_0
     delta_omega = 2/tau_0
     # calculate Rayleigh range
-    z_R = (omega_0*w_0**2)/(2*c)
-    eps = w_0/z_R
-    # amplitude factor
-    P_corr = 1 + 3*(eps/2)**2 + 9*(eps/2)**4
-    Amp = np.sqrt(8*P/(P_corr*np.pi*e_0*c)) * (omega_0/(2*c))
+    z_R0 = (omega_0*w_00**2)/(2*c)
     
     t_start = -50*tau_0
     t_end = 600*tau_0
@@ -30,7 +26,16 @@ def RPLB_acc_SC_2D(lambda_0, tau_0, w_0, P, Psi_0, phi_2, phi_3, z_0, x_0, beta_
 
     pulse_temp = np.exp(-((omega-omega_0)/delta_omega)**2)
     pulse_prep = pulse_temp*np.exp(-1j*((phi_2/2)*(omega-omega_0)**2 + (phi_3/6)*(omega-omega_0)**3))
-    x_omega = w_0*tau_t*(omega-omega_0)/2
+    z_omega = z_R0*tau_p*(omega-omega_0)
+    x_omega = w_00*tau_t*(omega-omega_0)/2
+    w_0 = w_00*(omega_0/omega)**((g_0+1)/2)
+    z_R = z_R0*(omega_0/omega)**(g_0)
+
+    # perturbation parameter
+    eps = w_0/z_R
+    # amplitude factor
+    P_corr = 1 + 3*(eps/2)**2 + 9*(eps/2)**4
+    Amp = np.sqrt(8*P/(P_corr*np.pi*e_0*c)) * (omega/(2*c))
 
     z = np.empty(shape=(len(time)))
     x = np.empty(shape=(len(time)))
@@ -49,12 +54,9 @@ def RPLB_acc_SC_2D(lambda_0, tau_0, w_0, P, Psi_0, phi_2, phi_3, z_0, x_0, beta_
     # do 5th order Adams-Bashforth finite difference method
     for k in range(0, len(time)-1):
 
-        phi_G = np.arctan(z[k]/z_R)
-        w = w_0*np.sqrt(1+(z[k]/z_R)**2)
-        if z[k] == 0.0:
-            R = np.inf
-        else:
-            R = z[k] + (z_R**2)/z[k]
+        phi_G = np.arctan((z[k]-z_omega)/z_R)
+        w = w_0*np.sqrt(1+((z[k]-z_omega)/z_R)**2)
+        R = (z[k]-z_omega) + (z_R**2)/(z[k]-z_omega)
         phi_norm = Psi_0-(omega/c)*(z[k]+((x[k]-x_omega)**2)/(2*R))+omega*time[k]
         trans = np.exp(-((x[k]-x_omega)/w)**2)
 
@@ -70,24 +72,24 @@ def RPLB_acc_SC_2D(lambda_0, tau_0, w_0, P, Psi_0, phi_2, phi_3, z_0, x_0, beta_
 
         E_z_spec = pulse_prep*((c_2 - c_3*rho**2)*eps**2 +
                                ((1/2)*c_3 + (1/2)*c_4*rho**2 - (5/4)*c_5*rho**4 + (1/4)*c_6*rho**6)*eps**4)
-        E_z_time = np.sum(E_z_spec*trans)*omega_step/(delta_omega*np.sqrt(np.pi))
+        E_z_time = np.sum(Amp*E_z_spec*trans)*omega_step/(delta_omega*np.sqrt(np.pi))
 
         E_x_spec = pulse_prep*((x[k]-x_omega)/np.abs(x[k]-x_omega))*((c_2*rho)*eps +
                                (-(1/2)*c_3*rho + c_4*rho**3 - (1/4)*c_5*rho**5)*eps**3 +
                                (-(3/8)*c_4*rho - (3/8)*c_5*rho**3 + (17/16)*c_6*rho**5 -
                                 (3/8)*c_7*rho**7 + (1/32)*c_8*rho**9)*eps**5)*np.exp(+1j*np.pi/2)
-        E_x_time = np.sum(E_x_spec*trans)*omega_step/(delta_omega*np.sqrt(np.pi))
+        E_x_time = np.sum(Amp*E_x_spec*trans)*omega_step/(delta_omega*np.sqrt(np.pi))
 
         B_y_spec = pulse_prep*((x[k]-x_omega)/np.abs(x[k]-x_omega))*((c_2*rho)*eps +
                                ((1/2)*c_3*rho + (1/2)*c_4*rho**3 - (1/4)*c_5*rho**5)*eps**3 +
                                ((3/8)*c_4*rho + (3/8)*c_5*rho**3 + (3/16)*c_6*rho**5 -
                                 (1/4)*c_7*rho**7 + (1/32)*c_8*rho**9)*eps**5)*np.exp(+1j*np.pi/2)/c
-        B_y_time = np.sum(B_y_spec*trans)*omega_step/(delta_omega*np.sqrt(np.pi))
+        B_y_time = np.sum(Amp*B_y_spec*trans)*omega_step/(delta_omega*np.sqrt(np.pi))
 
-        E_z_total = np.real(Amp*E_z_time)
-        E_x_total = np.real(Amp*E_x_time)
+        E_z_total = np.real(E_z_time)
+        E_x_total = np.real(E_x_time)
         dot_product = v_z[k]*E_z_total + v_x[k]*E_x_total
-        B_y_total = np.real(Amp*B_y_time)
+        B_y_total = np.real(B_y_time)
 
         deriv2[k] = (-q_e/(gamma[k]*m_e))*(E_z_total+v_x[k]*B_y_total-v_z[k]*dot_product/(c**2))
         deriv4[k] = (-q_e/(gamma[k]*m_e))*(E_x_total-v_z[k]*B_y_total-v_x[k]*dot_product/(c**2))
