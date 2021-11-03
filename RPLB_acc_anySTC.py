@@ -2,7 +2,7 @@ import numpy as np
 from numba import jit
 
 @jit(nopython=True)
-def RPLB_acc_anySTC(lambda_0, tau_0, w_00, P, Psi_0, phi_2, phi_3, z_0, beta_0, tau_p, g_0):
+def RPLB_acc_anySTC(lambda_0, tau_0, w_00, P, Psi_0, spec_phase_coeffs, z_0, beta_0, LC_coeffs, g_0):
     # initialize constants (SI units)
     c = 2.99792458e8 #speed of light
     m_e = 9.10938356e-31
@@ -27,8 +27,21 @@ def RPLB_acc_anySTC(lambda_0, tau_0, w_00, P, Psi_0, phi_2, phi_3, z_0, beta_0, 
     omega_step = omega[1]-omega[0]
 
     pulse_temp = np.exp(-((omega-omega_0)/delta_omega)**2)
-    pulse_prep = pulse_temp*np.exp(-1j*((phi_2/2)*(omega-omega_0)**2 + (phi_3/6)*(omega-omega_0)**3))
-    z_omega = z_R0*tau_p*(omega-omega_0)
+    
+    spec_phase = np.zeros(shape=len(omega))
+    temp = 1
+    for i in range(0, len(spec_phase_coeffs)):
+        temp = temp*(i+2)
+        spec_phase = spec_phase+(spec_phase_coeffs[i]/temp)*(omega-omega_0)**(i+2)
+    
+    pulse_prep = pulse_temp*np.exp(-1j*spec_phase)
+    
+    z_omega = np.zeros(shape=len(omega))
+    temp = 1
+    for j in range(0, len(LC_coeffs)):
+        temp = temp*(j+1)
+        z_omega = z_omega+z_R0*(LC_coeffs[j]/temp)*(omega-omega_0)**(j+1)
+
     z_R = z_R0*(omega_0/omega)**(g_0)
 
     z = np.zeros(shape=(len(time)))
