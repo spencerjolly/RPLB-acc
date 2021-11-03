@@ -17,7 +17,7 @@ The general model used to produce the fields simulated here can be found in Ref.
 
 -functions do not currently automatically choose the starting time, ending time, or the temporal resolution of the finite difference method. This means that they will not work as-is for very high laser powers or very tight focusing (i.e. there is a limit on the laser intensity) and the associated high electron energy.
 
--The functions are all limited at the moment to Gaussian spectral profiles, effectively limiting the minimum pulse duration that can be properly simulated. For example with a wavelength of 800 nm the lower limit of the pulse duration is around 4 fs.
+-The functions are all limited at the moment to Gaussian spectral profiles, effectively limiting the minimum pulse duration that can be properly simulated. For example with a wavelength of 800 nm the lower limit of the pulse duration in the g_0 functions is around 4 fs. There are other approximations in the LC and SC functions such that the pulse must be longer than few-cycle, limiting the applicablity of those functions to pulses as short as ~10 fs for an 800 nm wavelength.
 
 <b>References:</b>
 
