@@ -15,7 +15,7 @@ def RPLB_acc_anySTC_2D(lambda_0, tau_0, w_00, P, Psi_0, spec_phase_coeffs, z_0, 
     z_R0 = (omega_0*w_00**2)/(2*c)
     
     t_start = -50*tau_0
-    t_end = 600*tau_0
+    t_end = 1400*tau_0
     n = 200  # number of time steps per laser period
     num_t = np.int_(np.round(n*(t_end-t_start)/(lambda_0/c)))
     time = np.linspace(t_start, t_end, num_t)
