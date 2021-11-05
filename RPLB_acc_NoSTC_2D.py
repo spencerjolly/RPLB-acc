@@ -46,11 +46,8 @@ def RPLB_acc_NoSTC_2D(lambda_0, tau_0, w_0, P, Psi_0, phi_2, z_0, r_0, beta_0):
     for k in range(0, len(time)-1):
         phi_G = np.arctan(z[k]/z_R)
         w = w_0*np.sqrt(1+(z[k]/z_R)**2)
-        if z[k] == 0.0:
-            R = np.inf
-        else:
-            R = z[k] + (z_R**2)/z[k]
-        phi_norm = Psi_0+omega_0*time[k]-(omega_0/c)*(z[k]+(r[k]**2)/(2*R))
+        R_inv = z[k]/(z[k]**2 + z_R**2)
+        phi_norm = Psi_0+omega_0*time[k]-(omega_0/c)*(z[k]+(R_inv*r[k]**2)/2)
         trans = np.exp(-(r[k]/w)**2)
 
         c_2 = (w_0/w)**2 * np.exp(1j*(phi_norm + 2*phi_G))

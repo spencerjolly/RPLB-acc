@@ -55,8 +55,8 @@ def RPLB_acc_g0_2D(lambda_0, tau_0, w_00, P, Psi_0, phi_2, phi_3, z_0, r_0, beta
 
         phi_G = np.arctan(z[k]/z_R)
         w = w_0*np.sqrt(1+(z[k]/z_R)**2)
-        R = (z[k]) + (z_R**2)/(z[k])
-        phi_norm = Psi_0-(omega/c)*(z[k]+(r[k]**2)/(2*R))+omega*time[k]
+        R_inv = z[k]/(z[k]**2 + z_R**2)
+        phi_norm = Psi_0-(omega/c)*(z[k]+(R_inv*r[k]**2)/2)+omega*time[k]
         trans = np.exp(-(r[k]/w)**2)
 
         c_2 = (w_0/w)**2 * np.exp(1j*(phi_norm + 2*phi_G))

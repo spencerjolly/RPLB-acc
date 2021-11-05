@@ -74,8 +74,8 @@ def RPLB_acc_anySTC_2D(lambda_0, tau_0, w_00, P, Psi_0, spec_phase_coeffs, z_0, 
 
         phi_G = np.arctan((z[k]-z_omega)/z_R)
         w = w_0*np.sqrt(1+((z[k]-z_omega)/z_R)**2)
-        R = (z[k]-z_omega) + (z_R**2)/(z[k]-z_omega)
-        phi_norm = Psi_0-(omega/c)*(z[k]+((x[k]-x_omega)**2)/(2*R))+omega*time[k]
+        R_inv = (z[k]-z_omega)/((z[k]-z_omega)**2 + z_R**2)
+        phi_norm = Psi_0-(omega/c)*(z[k]+(R_inv*(x[k]-x_omega)**2)/2)+omega*time[k]
         trans = np.exp(-((x[k]-x_omega)/w)**2)
 
         c_2 = (w_0/w)**2 * np.exp(1j*(phi_norm + 2*phi_G))
