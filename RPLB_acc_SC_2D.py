@@ -69,16 +69,16 @@ def RPLB_acc_SC_2D(lambda_0, tau_0, w_0, P, Psi_0, phi_2, phi_3, z_0, x_0, beta_
                                ((1/2)*c_3 + (1/2)*c_4*rho**2 - (5/4)*c_5*rho**4 + (1/4)*c_6*rho**6)*eps**4)
         E_z_time = np.sum(E_z_spec*trans)*omega_step/(delta_omega*np.sqrt(np.pi))
 
-        E_x_spec = pulse_prep*((x[k]-x_omega)/np.abs(x[k]-x_omega))*((c_2*rho)*eps +
-                               (-(1/2)*c_3*rho + c_4*rho**3 - (1/4)*c_5*rho**5)*eps**3 +
-                               (-(3/8)*c_4*rho - (3/8)*c_5*rho**3 + (17/16)*c_6*rho**5 -
-                                (3/8)*c_7*rho**7 + (1/32)*c_8*rho**9)*eps**5)*np.exp(+1j*np.pi/2)
+        E_x_spec = pulse_prep*((x[k]-x_omega)/w_0)*((c_2)*eps +
+                               (-(1/2)*c_3 + c_4*rho**2 - (1/4)*c_5*rho**4)*eps**3 +
+                               (-(3/8)*c_4 - (3/8)*c_5*rho**2 + (17/16)*c_6*rho**4 -
+                                (3/8)*c_7*rho**6 + (1/32)*c_8*rho**8)*eps**5)*np.exp(+1j*np.pi/2)
         E_x_time = np.sum(E_x_spec*trans)*omega_step/(delta_omega*np.sqrt(np.pi))
 
-        B_y_spec = pulse_prep*((x[k]-x_omega)/np.abs(x[k]-x_omega))*((c_2*rho)*eps +
-                               ((1/2)*c_3*rho + (1/2)*c_4*rho**3 - (1/4)*c_5*rho**5)*eps**3 +
-                               ((3/8)*c_4*rho + (3/8)*c_5*rho**3 + (3/16)*c_6*rho**5 -
-                                (1/4)*c_7*rho**7 + (1/32)*c_8*rho**9)*eps**5)*np.exp(+1j*np.pi/2)/c
+        B_y_spec = pulse_prep*((x[k]-x_omega)/w_0)*((c_2)*eps +
+                               ((1/2)*c_3 + (1/2)*c_4*rho**2 - (1/4)*c_5*rho**4)*eps**3 +
+                               ((3/8)*c_4 + (3/8)*c_5*rho**2 + (3/16)*c_6*rho**4 -
+                                (1/4)*c_7*rho**6 + (1/32)*c_8*rho**8)*eps**5)*np.exp(+1j*np.pi/2)/c
         B_y_time = np.sum(B_y_spec*trans)*omega_step/(delta_omega*np.sqrt(np.pi))
 
         E_z_total = np.real(Amp*E_z_time)
