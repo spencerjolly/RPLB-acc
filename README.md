@@ -7,9 +7,9 @@ Functions 'RPLB_acc_LC.py' and 'RPLB_acc_LC_2D.py' produce the same results as a
 
 Functions 'RPLB_acc_g0.py' and 'RPLB_acc_g0_2D.py' produce the same results as above for the case where the laser has frequency-varying beam parameters according to the "Porras factor" g_0. These functions can reproduce results from Ref. [3].
 
-The function 'RPLB_acc_SC_2D.py' produces the same results as above for the case where the laser has spatial chirp (SC) in the focus. Because of the breaking of cylindrical symmetry there is no 1D scenario in this case. An electron starting initially on-axis will still gain transverse momentum and move off-axis when there is non-zero SC.
+The function 'RPLB_acc_SC_2D.py' produces the same results as above for the case where the laser has spatial chirp (SC) in the focus. Because of the breaking of cylindrical symmetry there is no 1D scenario in this case. An electron starting initially on-axis will still gain transverse momentum and move off-axis when there is non-zero SC. The 3D script 'RPLB_acc_SC_3D.py' simulates an arbitrary electron trajectory in full dimensions when there is SC (i.e. the y-component of the force is added).
 
-Finally, there are multiple functions that apply all of the STCs that are possible (in this formalism) for a given dimensionality. The function 'RPLB_acc_anySTC.py' simulates electron acceleration purely on-axis (r=0) for a pulse that has LC and/or g_0 considered (i.e. retaining cylindrical symmetry). The function 'RPLB_acc_anySTC_2D.py' simulates the 2D case, where SC is added to LC and/or g_0 (simulating electrons in the x-z plane only). A 3D script is under development.
+Finally, there are multiple functions that apply all of the STCs that are possible (in this formalism) for a given dimensionality. The function 'RPLB_acc_anySTC.py' simulates electron acceleration purely on-axis (r=0) for a pulse that has LC and/or g_0 considered (i.e. retaining cylindrical symmetry). The function 'RPLB_acc_anySTC_2D.py' simulates the 2D case, where SC is added to LC and/or g_0 (simulating electrons in the x-z plane only). The 3D script 'RPLB_acc_anySTC_3D.py' simulates an arbitrary electron trajectory in full dimensions.
 
 The script (jupyter notebook) 'Function_test.ipynb' shows simple examples of how to call all of the functions.
 
