@@ -26,30 +26,35 @@ def RPLB_acc_anySTC(lambda_0, tau_0, w_00, P, Psi_0, spec_phase_coeffs, z_0, bet
     omega = np.linspace((omega_0-4*delta_omega), (omega_0+4*delta_omega), 300)
     omega_step = omega[1]-omega[0]
 
-    pulse_temp = np.exp(-((omega-omega_0)/delta_omega)**2)
+    pulse_temp = np.exp(-((omega-omega_0)/delta_omega)**2)  # spectral envelope
     
+    # Spectral phase components
     spec_phase = np.zeros(shape=len(omega))
     temp = 1
     for i in range(0, len(spec_phase_coeffs)):
         temp = temp*(i+2)
         spec_phase = spec_phase+(spec_phase_coeffs[i]/temp)*(omega-omega_0)**(i+2)
     
-    pulse_prep = pulse_temp*np.exp(-1j*spec_phase)
+    pulse_prep = pulse_temp*np.exp(-1j*spec_phase)  # adding spectral phase to envelope
     
+    # Frequency dependent longitudinal waist position due to chromaticity
     z_omega = np.zeros(shape=len(omega))
     temp = 1
     for j in range(0, len(LC_coeffs)):
         temp = temp*(j+1)
         z_omega = z_omega+z_R0*(LC_coeffs[j]/temp)*(omega-omega_0)**(j+1)
 
+    # frequency dependent beam parameter based on Porras factor g_0
     z_R = z_R0*(omega_0/omega)**(g_0)
 
+    # initialize empty arrays
     z = np.zeros(shape=(len(time)))
     beta = np.zeros(shape=(len(time)))
     deriv1 = np.zeros(shape=(len(time)))
     deriv2 = np.zeros(shape=(len(time)))
     KE = np.zeros(shape=(len(time)))
 
+    # Set initial conditions
     beta[0] = beta_0
     z[0] = beta[0]*c*time[0]+z_0
 
@@ -62,7 +67,7 @@ def RPLB_acc_anySTC(lambda_0, tau_0, w_00, P, Psi_0, spec_phase_coeffs, z_0, bet
         pulse_time = np.sum(pulse_spec*np.exp(1j*omega*time[k]))*omega_step/(delta_omega*np.sqrt(np.pi))
         field_total = Amp*np.exp(1j*Psi_0)*pulse_time
 
-        deriv2[k] = (-q_e*np.real(field_total)*((1-beta[k]**2)**(3/2))/(m_e*c))
+        deriv2[k] = (-q_e*np.real(field_total)*((1-beta[k]**2)**(3/2))/(m_e*c))  # Force in z
 
         if k==0:
             z[k+1] = z[k] + dt*deriv1[k]

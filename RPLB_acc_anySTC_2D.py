@@ -24,28 +24,32 @@ def RPLB_acc_anySTC_2D(lambda_0, tau_0, w_00, P, Psi_0, spec_phase_coeffs, z_0, 
     omega = np.linspace((omega_0-4*delta_omega), (omega_0+4*delta_omega), 300)
     omega_step = omega[1]-omega[0]
 
-    pulse_temp = np.exp(-((omega-omega_0)/delta_omega)**2)
+    pulse_temp = np.exp(-((omega-omega_0)/delta_omega)**2)  # spectral envelope
     
+    # Spectral phase components
     spec_phase = np.zeros(shape=len(omega))
     temp = 1
     for i in range(0, len(spec_phase_coeffs)):
         temp = temp*(i+2)
         spec_phase = spec_phase+(spec_phase_coeffs[i]/temp)*(omega-omega_0)**(i+2)
     
-    pulse_prep = pulse_temp*np.exp(-1j*spec_phase)
+    pulse_prep = pulse_temp*np.exp(-1j*spec_phase)  # adding spectral phase to envelope
     
+    # Frequency dependent longitudinal waist position due to chromaticity
     z_omega = np.zeros(shape=len(omega))
     temp = 1
     for j in range(0, len(LC_coeffs)):
         temp = temp*(j+1)
         z_omega = z_omega+z_R0*(LC_coeffs[j]/temp)*(omega-omega_0)**(j+1)
         
+    # Frequency dependent transverse focal position due to spatial chirp
     x_omega = np.zeros(shape=len(omega))
     temp = 1
     for j in range(0, len(LC_coeffs)):
         temp = temp*(j+1)
         x_omega = x_omega+(w_00/2)*(SC_coeffs[j]/temp)*(omega-omega_0)**(j+1)
     
+    # frequency dependent beam parameters based on Porras factor g_0
     w_0 = w_00*(omega_0/omega)**((g_0+1)/2)
     z_R = z_R0*(omega_0/omega)**(g_0)
 
@@ -55,6 +59,7 @@ def RPLB_acc_anySTC_2D(lambda_0, tau_0, w_00, P, Psi_0, spec_phase_coeffs, z_0, 
     P_corr = 1 + 3*(eps/2)**2 + 9*(eps/2)**4
     Amp = np.sqrt(8*P/(P_corr*np.pi*e_0*c)) * (omega/(2*c))
 
+    # initialize empty arrays
     z = np.empty(shape=(len(time)))
     x = np.empty(shape=(len(time)))
     v_z = np.empty(shape=(len(time)))
@@ -63,6 +68,7 @@ def RPLB_acc_anySTC_2D(lambda_0, tau_0, w_00, P, Psi_0, spec_phase_coeffs, z_0, 
     deriv2 = np.empty(shape=(len(time)))
     deriv4 = np.empty(shape=(len(time)))
 
+    # Set initial conditions
     z[0] = beta_0*c*time[0] + z_0
     x[0] = x_0
     v_z[0] = beta_0*c
@@ -109,8 +115,8 @@ def RPLB_acc_anySTC_2D(lambda_0, tau_0, w_00, P, Psi_0, spec_phase_coeffs, z_0, 
         dot_product = v_z[k]*E_z_total + v_x[k]*E_x_total
         B_y_total = np.real(B_y_time)
 
-        deriv2[k] = (-q_e/(gamma[k]*m_e))*(E_z_total+v_x[k]*B_y_total-v_z[k]*dot_product/(c**2))
-        deriv4[k] = (-q_e/(gamma[k]*m_e))*(E_x_total-v_z[k]*B_y_total-v_x[k]*dot_product/(c**2))
+        deriv2[k] = (-q_e/(gamma[k]*m_e))*(E_z_total+v_x[k]*B_y_total-v_z[k]*dot_product/(c**2))  # Force in z
+        deriv4[k] = (-q_e/(gamma[k]*m_e))*(E_x_total-v_z[k]*B_y_total-v_x[k]*dot_product/(c**2))  # Force in x
 
         if k==0:
             z[k+1] = z[k] + dt*v_z[k]
