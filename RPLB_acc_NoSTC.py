@@ -20,7 +20,8 @@ def RPLB_acc_NoSTC(lambda_0, tau_0, w_0, P, Psi_0, phi_2, z_0, beta_0):
     
     t_start = -50*tau_0
     t_end = +600*tau_0
-    n = 50
+    # number of time steps per laser period
+    n = np.round(np.sqrt(P*tau_0/(tau*w_0**2))/(5e10))  # empirically chosen resolution based on field strength
     num_t = np.int_(np.round(n*(t_end-t_start)/(lambda_0/c)))
     time = np.linspace(t_start, t_end, num_t)
     dt = time[1]-time[0]
@@ -60,7 +61,7 @@ def RPLB_acc_NoSTC(lambda_0, tau_0, w_0, P, Psi_0, phi_2, z_0, beta_0):
 
         KE[k+1] = ((1/np.sqrt(1-beta[k+1]**2))-1)*m_e*c**2/q_e
         
-        #if (time[k] > 100*tau_0 and np.abs(np.mean(np.diff(KE[k-100:k+1])/(KE[k+1]*dt))) < 1e5):
+        #if (time[k] > 100*tau_0 and np.abs(np.mean(np.diff(KE[k-100:k+1])/(KE[k+1]*dt))) < 1e6):
         #    k_stop = k+1
         #    break
 
