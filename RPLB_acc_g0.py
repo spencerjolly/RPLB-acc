@@ -32,7 +32,6 @@ def RPLB_acc_g0(lambda_0, tau_0, w_00, P, Psi_0, phi_2, phi_3, z_0, beta_0, g_0)
 
     z = np.zeros(shape=(len(time)))
     beta = np.zeros(shape=(len(time)))
-    deriv1 = np.zeros(shape=(len(time)))
     deriv2 = np.zeros(shape=(len(time)))
     KE = np.zeros(shape=(len(time)))
 
@@ -41,8 +40,6 @@ def RPLB_acc_g0(lambda_0, tau_0, w_00, P, Psi_0, phi_2, phi_3, z_0, beta_0, g_0)
 
     # do 5th order Adams-Bashforth finite difference method
     for k in range(0, len(time)-1):
-        
-        deriv1[k] = beta[k]*c
 
         pulse_spec = pulse_prep*np.exp(1j*(2*np.arctan(z[k]/z_R)-omega*z[k]/c))/(z_R*(1+(z[k]/z_R)**2))
         pulse_time = np.sum(pulse_spec*np.exp(1j*omega*time[k]))*omega_step/(delta_omega*np.sqrt(np.pi))
@@ -51,21 +48,21 @@ def RPLB_acc_g0(lambda_0, tau_0, w_00, P, Psi_0, phi_2, phi_3, z_0, beta_0, g_0)
         deriv2[k] = (-q_e*np.real(field_total)*((1-beta[k]**2)**(3/2))/(m_e*c))
 
         if k==0:
-            z[k+1] = z[k] + dt*deriv1[k]
+            z[k+1] = z[k] + dt*c*beta[k]
             beta[k+1] = beta[k] + dt*deriv2[k]
         elif k==1:
-            z[k+1] = z[k] + dt*(1.5*deriv1[k]-0.5*deriv1[k-1])
+            z[k+1] = z[k] + dt*c*(1.5*beta[k]-0.5*beta[k-1])
             beta[k+1] = beta[k] + dt*(1.5*deriv2[k]-0.5*deriv2[k-1])
         elif k==2:
-            z[k+1] = z[k] + dt*((23/12)*deriv1[k]-(4/3)*deriv1[k-1]+(5/12)*deriv1[k-2])
+            z[k+1] = z[k] + dt*c*((23/12)*beta[k]-(4/3)*beta[k-1]+(5/12)*beta[k-2])
             beta[k+1] = beta[k] + dt*((23/12)*deriv2[k]-(4/3)*deriv2[k-1]+(5/12)*deriv2[k-2])
         elif k==3:
-            z[k+1] = z[k] + dt*((55/24)*deriv1[k]-(59/24)*deriv1[k-1]+(37/24)*deriv1[k-2]-(3/8)*deriv1[k-3])
+            z[k+1] = z[k] + dt*c*((55/24)*beta[k]-(59/24)*beta[k-1]+(37/24)*beta[k-2]-(3/8)*beta[k-3])
             beta[k+1] = beta[k] + dt*((55/24)*deriv2[k]-(59/24)*deriv2[k-1]+(37/24)*deriv2[k-2]-(3/8)*deriv2[k-3])
         else:
-            z[k+1] = z[k] + dt*((1901/720)*deriv1[k]-(1387/360)*deriv1[k-1]+(109/30)*deriv1[k-2]-(637/360)*deriv1[k-3]+(251/720)*deriv1[k-4])
+            z[k+1] = z[k] + dt*c*((1901/720)*beta[k]-(1387/360)*beta[k-1]+(109/30)*beta[k-2]-(637/360)*beta[k-3]+(251/720)*beta[k-4])
             beta[k+1] = beta[k] + dt*((1901/720)*deriv2[k]-(1387/360)*deriv2[k-1]+(109/30)*deriv2[k-2]-(637/360)*deriv2[k-3]+(251/720)*deriv2[k-4])
-            
+
         KE[k+1] = ((1/np.sqrt(1-beta[k+1]**2))-1)*m_e*c**2/q_e
         
         #if (time[k] > 100*tau_0 and np.abs(np.mean(np.diff(KE[k-100:k+1])/(KE[k+1]*dt))) < 1e5):
