@@ -18,7 +18,7 @@ def RPLB_acc_NoSTC(lambda_0, tau_0, w_0, P, Psi_0, phi_2, z_0, beta_0):
     # stretched pulse duration
     tau = np.sqrt(tau_0**2 + (2*phi_2/tau_0)**2)
     
-    t_start = -10*tau_0
+    t_start = -10*tau_0 + z_0/c
     t_end = +1e5*tau_0
     # number of time steps per laser period
     n = np.round(np.sqrt(P*tau_0/(tau*w_0**2))/(5e10))  # empirically chosen resolution based on field strength
@@ -64,7 +64,7 @@ def RPLB_acc_NoSTC(lambda_0, tau_0, w_0, P, Psi_0, phi_2, z_0, beta_0):
 
         KE[k+1] = ((1/np.sqrt(1-beta[k+1]**2))-1)*m_e*c**2/q_e
         
-        if (time[k] > 10*tau_0 and np.mean(np.abs(np.diff(KE[k-np.int(4*n):k+1]))/(KE[k+1]*dt)) < 1e7):
+        if (time[k] > 100*tau_0 and np.mean(np.abs(np.diff(KE[k-np.int(10*n):k+1]))/(KE[k+1]*dt)) < 1e7):
             k_stop = k+1
             break
 
