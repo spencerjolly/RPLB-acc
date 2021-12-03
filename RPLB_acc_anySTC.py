@@ -2,7 +2,7 @@ import numpy as np
 from numba import jit
 
 @jit(nopython=True)
-def RPLB_acc_anySTC(lambda_0, tau_0, w_00, P, Psi_0, spec_phase_coeffs, z_0, beta_0, LC_coeffs, g_0):
+def RPLB_acc_anySTC(lambda_0, tau_0, w_00, P, Psi_0, spec_phase_coeffs, z_0, beta_0, LC_coeffs, g_0_coeffs):
     # initialize constants (SI units)
     c = 2.99792458e8 #speed of light
     m_e = 9.10938356e-31
@@ -47,8 +47,15 @@ def RPLB_acc_anySTC(lambda_0, tau_0, w_00, P, Psi_0, spec_phase_coeffs, z_0, bet
         temp = temp*(j+1)
         z_omega = z_omega+z_R0*(LC_coeffs[j]/temp)*(omega-omega_0)**(j+1)
 
-    # frequency dependent beam parameter based on Porras factor g_0
-    z_R = z_R0*(omega_0/omega)**(g_0)
+    # frequency dependent beam parameter based on Porras factor g_0, or arbitrary coefficients p_n
+    if len(g_0_coeffs) == 1:
+        z_R = z_R0*(omega_0/omega)**(g_0_coeffs)
+    else:
+        z_R = z_R0 + np.zeros(shape=len(omega))
+        temp = 1
+        for j in range(0, len(g_0_coeffs)):
+            temp = temp*(j+1)
+            z_R = z_R+z_R0*(g_0_coeffs[j]/temp)*((omega-omega_0)/omega_0)**(j+1)
 
     # initialize empty arrays
     z = np.zeros(shape=(len(time)))
