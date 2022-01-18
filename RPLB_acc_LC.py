@@ -2,7 +2,7 @@ import numpy as np
 from numba import jit
 
 @jit(nopython=True)
-def RPLB_acc_LC(lambda_0, tau_0, w_0, P, Psi_0, phi_2, phi_3, z_0, beta_0, tau_p):
+def RPLB_acc_LC(lambda_0, tau_0, w_0, P, Psi_0, phi_2, phi_3, t_0, z_0, beta_0, tau_p):
     # initialize constants (SI units)
     c = 2.99792458e8 #speed of light
     m_e = 9.10938356e-31
@@ -20,7 +20,7 @@ def RPLB_acc_LC(lambda_0, tau_0, w_0, P, Psi_0, phi_2, phi_3, z_0, beta_0, tau_p
     # stretched pulse duration (approx)
     tau = np.sqrt(tau_0**2 + (2*phi_2/tau_0)**2)
     
-    t_start = -50*tau_0
+    t_start = t_0 + z_0/c
     t_end = 1400*tau_0
     # number of time steps per laser period
     n = np.maximum(50, np.round(np.sqrt(P*tau_0/(tau*w_0**2))/(5e10)))  # (empirically chosen resolution based on field strength)
