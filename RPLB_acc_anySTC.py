@@ -95,7 +95,7 @@ def RPLB_acc_anySTC(lambda_0, tau_0, w_00, P, Psi_0, spec_phase_coeffs, LC_coeff
 
         KE[k+1] = ((1/np.sqrt(1-beta[k+1]**2))-1)*m_e*c**2/q_e
         
-        if (time[k] > 100*tau_0 and np.mean(np.abs(np.diff(KE[k-np.int(10*n):k+1]))/(KE[k+1]*dt)) < 1e7):
+        if (time[k] > 300*tau_0 and np.mean(np.abs(np.diff(KE[k-np.int(10*n):k+1]))/(KE[k+1]*dt)) < 1e7):
             k_stop = k+1
             break
 
