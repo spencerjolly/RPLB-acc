@@ -99,4 +99,4 @@ def RPLB_acc_anySTC(lambda_0, tau_0, w_00, P, Psi_0, spec_phase_coeffs, LC_coeff
             k_stop = k+1
             break
 
-    return KE[k_stop]
+    return time[:k_stop], z[:k_stop], v_z[:k_stop], KE[:k_stop]

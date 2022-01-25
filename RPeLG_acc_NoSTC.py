@@ -68,4 +68,4 @@ def RPeLG_acc_NoSTC(nLG, lambda_0, tau_0, w_0, P, Psi_0, phi_2, t_0, z_0, beta_0
             k_stop = k+1
             break
 
-    return KE[k_stop]
+    return time[:k_stop], z[:k_stop], v_z[:k_stop], KE[:k_stop]
