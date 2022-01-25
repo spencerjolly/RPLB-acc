@@ -72,4 +72,4 @@ def RPLB_acc_g0(lambda_0, tau_0, w_00, P, Psi_0, phi_2, phi_3, t_0, z_0, beta_0,
             k_stop = k+1
             break
 
-    return time[:k_stop], z[:k_stop], v_z[:k_stop], KE[:k_stop]
+    return time[:k_stop], z[:k_stop], beta[:k_stop], KE[:k_stop]
