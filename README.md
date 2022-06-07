@@ -17,9 +17,13 @@ The general model used to produce the fields simulated here can be found in Ref.
 
 <b>Under development:</b>
 
--functions do not currently automatically choose the starting time, ending time, or the temporal resolution of the finite difference method. This means that they will not work as-is for very high laser powers or very tight focusing (i.e. there is a limit on the laser intensity and the associated high electron energy).
+-Not all functions currently automatically choose the starting time, ending time, or the temporal resolution of the finite difference method. This means that they may not work as-is for very high laser powers or very tight focusing (i.e. there is a limit on the laser intensity and the associated high electron energy).
 
--The functions are all limited at the moment to Gaussian spectral profiles, effectively limiting the minimum pulse duration that can be properly simulated. For example with a wavelength of 800 nm the lower limit of the pulse duration in the g_0 functions is around 4 fs. There are other approximations in the LC and SC functions such that the pulse must be longer than few-cycle, limiting the applicablity of those functions to pulses as short as ~10 fs for an 800 nm wavelength.
+-The functions are all limited at the moment to Gaussian spectral profiles (except for the NoSTCApril case), effectively limiting the minimum pulse duration that can be properly simulated. For example with a wavelength of 800 nm the lower limit of the pulse duration in the g_0 functions is around 4 fs. There are other approximations in the LC and SC functions such that the pulse must be longer than few-cycle, limiting the applicablity of those functions to pulses as short as ~10 fs for an 800 nm wavelength.
+
+-There are two functions 'RPLB_acc_NoSTCApril.py' and 'RPLB_acc_anySTCApril.py' that use the model from [6] to allow for arbitrarily non-paraxial focusing. The functions "April_test.ipynb" and "AprilSTC_ipynb" test the functions and compare them to the model in the other "standard" functions. These functions work, but are not as fully tested as all others.
+
+-There are functions "APLB_acc_anySTC_2D.py", "RPeLG_acc_NoSTC.py", and "RPLG_acc_NoSTC.py" which are testing various other pulses (without yet considering STCs). These functions are very experimental and should not be considered correct.
 
 <b>References:</b>
 
@@ -30,6 +34,8 @@ The general model used to produce the fields simulated here can be found in Ref.
 [3] S. W. Jolly, On the importance of frequency-dependent beam parameters for vacuum acceleration with few-cycle radially-polarized laser beams, Optics Letters <b>45</b>, 3865–3868 (2020). https://www.osapublishing.org/ol/abstract.cfm?uri=ol-45-14-3865 (https://arxiv.org/abs/1912.04026)
 
 [4] S. W. Jolly, Focused fields of ultrashort radially polarized laser pulses having low-order spatiotemporal couplings, Physical Review A 103, 033512 (2021). https://journals.aps.org/pra/abstract/10.1103/PhysRevA.103.033512 (https://arxiv.org/abs/2012.02729)
+
+[5] A. April, Ultrashort, Strongly Focused Laser Pulses in Free Space, chapter 16 in the book "Coherence and Ultrashort Pulse Laser Emission", 355-382 (2010).
 
 <b>Acknowlegements:</b>
 
