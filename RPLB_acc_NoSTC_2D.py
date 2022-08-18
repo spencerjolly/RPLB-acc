@@ -2,7 +2,7 @@ import numpy as np
 from numba import jit
 
 @jit(nopython=True)
-def RPLB_acc_NoSTC_2D(lambda_0, tau_0, w_0, P, Psi_0, phi_2, z_0, r_0, beta_0):
+def RPLB_acc_NoSTC_2D(lambda_0, tau_0, w_0, P, Psi_0, phi_2, t_0, z_0, r_0, beta_0):
     # initialize constants (SI units)
     c = 2.99792458e8  # speed of light
     m_e = 9.10938356e-31
@@ -21,13 +21,14 @@ def RPLB_acc_NoSTC_2D(lambda_0, tau_0, w_0, P, Psi_0, phi_2, z_0, r_0, beta_0):
     # stretched pulse duration
     tau = np.sqrt(tau_0**2 + (2*phi_2/tau_0)**2)
     
-    t_start = -50*tau_0
-    t_end = +600*tau_0
-    n = 200
+    t_start = t_0 + z_0/c
+    t_end = +1400*tau_0
+    n = 1500  # number of time steps per laser period
     num_t = np.int_(np.round(n*(t_end-t_start)/(lambda_0/c)))
     time = np.linspace(t_start, t_end, num_t)
     dt = time[1]-time[0]
 
+    # initialize empty arrays
     z = np.empty(shape=(len(time)))
     r = np.empty(shape=(len(time)))
     v_z = np.empty(shape=(len(time)))
@@ -42,13 +43,16 @@ def RPLB_acc_NoSTC_2D(lambda_0, tau_0, w_0, P, Psi_0, phi_2, z_0, r_0, beta_0):
     v_r[0] = 0.0
     gamma[0] = 1/np.sqrt(1-beta_0**2)
 
-    #do 5th order Adams-Bashforth finite difference method
+    # do 5th order Adams-Bashforth finite difference method
     for k in range(0, len(time)-1):
+        
+        rho = r[k]/w_0
+        
         phi_G = np.arctan(z[k]/z_R)
         w = w_0*np.sqrt(1+(z[k]/z_R)**2)
         R_inv = z[k]/(z[k]**2 + z_R**2)
-        phi_norm = Psi_0+omega_0*time[k]-(omega_0/c)*(z[k]+(R_inv*r[k]**2)/2)
-        trans = np.exp(-(r[k]/w)**2)
+        phi_norm = Psi_0-(omega_0/c)*(z[k]+(R_inv*(rho*w_0)**2)/2)+omega_0*time[k]
+        trans = np.exp(-(rho*w_0/w)**2)
 
         c_2 = (w_0/w)**2 * np.exp(1j*(phi_norm + 2*phi_G))
         c_3 = (w_0/w)**3 * np.exp(1j*(phi_norm + 3*phi_G))
@@ -57,8 +61,6 @@ def RPLB_acc_NoSTC_2D(lambda_0, tau_0, w_0, P, Psi_0, phi_2, z_0, r_0, beta_0):
         c_6 = (w_0/w)**6 * np.exp(1j*(phi_norm + 6*phi_G))
         c_7 = (w_0/w)**7 * np.exp(1j*(phi_norm + 7*phi_G))
         c_8 = (w_0/w)**8 * np.exp(1j*(phi_norm + 8*phi_G))
-
-        rho = r[k]/w_0
 
         env_temp = np.exp(-((phi_norm-Psi_0)/(omega_0*tau))**2)
         temp_phase = np.exp(1j*(2*phi_2/(tau_0**4+(2*phi_2)**2))*(time[k]-z[k]/c)**2)
@@ -82,8 +84,8 @@ def RPLB_acc_NoSTC_2D(lambda_0, tau_0, w_0, P, Psi_0, phi_2, z_0, r_0, beta_0):
         dot_product = v_z[k]*E_z_total + v_r[k]*E_r_total
         B_t_total = np.real(Amp*trans*B_t_time)
 
-        deriv2[k] = (-q_e/(gamma[k]*m_e))*(E_z_total+v_r[k]*B_t_total-v_z[k]*dot_product/(c**2))
-        deriv4[k] = (-q_e/(gamma[k]*m_e))*(E_r_total-v_z[k]*B_t_total-v_r[k]*dot_product/(c**2))
+        deriv2[k] = (-q_e/(gamma[k]*m_e))*(E_z_total+v_r[k]*B_t_total-v_z[k]*dot_product/(c**2))  # Force in z
+        deriv4[k] = (-q_e/(gamma[k]*m_e))*(E_r_total-v_z[k]*B_t_total-v_r[k]*dot_product/(c**2))  # Force in r
 
         if k==0:
             z[k+1] = z[k] + dt*v_z[k]
@@ -114,4 +116,4 @@ def RPLB_acc_NoSTC_2D(lambda_0, tau_0, w_0, P, Psi_0, phi_2, z_0, r_0, beta_0):
         gamma[k+1] = 1/np.sqrt(1-(v_z[k+1]**2+v_r[k+1]**2)/c**2)
 
     KE = (gamma-1)*m_e*c**2/q_e
-    return time, z, r, v_z, v_r, KE[-1]
+    return time, z, r, v_z, v_r, KE

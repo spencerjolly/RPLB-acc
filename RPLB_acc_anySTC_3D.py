@@ -177,4 +177,4 @@ def RPLB_acc_anySTC_3D(lambda_0, tau_0, w_00, P, Psi_0, spec_phase_coeffs, LC_co
         gamma[k+1] = 1/np.sqrt(1-(v_z[k+1]**2+v_x[k+1]**2+v_y[k+1]**2)/c**2)
 
     KE = (gamma-1)*m_e*c**2/q_e
-    return time, z, x, y, v_z, v_x, v_y, KE[-1]
+    return time, z, x, y, v_z, v_x, v_y, KE
