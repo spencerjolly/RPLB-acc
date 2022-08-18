@@ -104,13 +104,13 @@ def APLB_acc_anySTC_3D(lambda_0, tau_0, w_00, P, Psi_0, spec_phase_coeffs, LC_co
         B_z_time = np.sum(Amp*B_z_spec*trans)*omega_step/(delta_omega*np.sqrt(np.pi))
 
         B_x_spec = -1*pulse_prep*((x[k]-x_omega)/w_0)*((c_2)*eps +
-                               (-(1/2)*c_3 + c_4*rho**2 - (1/4)*c_5*rho**4)*eps**4 +
+                               (-(1/2)*c_3 + c_4*rho**2 - (1/4)*c_5*rho**4)*eps**3 +
                                (-(3/8)*c_4 - (3/8)*c_5*rho**2 + (17/16)*c_6*rho**4 -
                                 (3/8)*c_7*rho**6 + (1/32)*c_8*rho**8)*eps**5)*np.exp(+1j*np.pi/2)/c
         B_x_time = np.sum(Amp*B_x_spec*trans)*omega_step/(delta_omega*np.sqrt(np.pi))
         
         B_y_spec = -1*pulse_prep*(y[k]/w_0)*((c_2)*eps +
-                               (-(1/2)*c_3 + c_4*rho**2 - (1/4)*c_5*rho**4)*eps**4 +
+                               (-(1/2)*c_3 + c_4*rho**2 - (1/4)*c_5*rho**4)*eps**3 +
                                (-(3/8)*c_4 - (3/8)*c_5*rho**2 + (17/16)*c_6*rho**4 -
                                 (3/8)*c_7*rho**6 + (1/32)*c_8*rho**8)*eps**5)*np.exp(+1j*np.pi/2)/c
         B_y_time = np.sum(Amp*B_y_spec*trans)*omega_step/(delta_omega*np.sqrt(np.pi))

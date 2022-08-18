@@ -76,12 +76,12 @@ def APLB_acc_NoSTC_3D(lambda_0, tau_0, w_0, P, Psi_0, phi_2, t_0, z_0, x_0, y_0,
                                ((1/2)*c_3 + (1/2)*c_4*rho**2 - (5/4)*c_5*rho**4 + (1/4)*c_6*rho**6)*eps**4)/c
 
         B_x_time = -1*pulse_prep*((c_2)*eps +
-                               (-(1/2)*c_3 + c_4*rho**2 - (1/4)*c_5*rho**4)*eps**4 +
+                               (-(1/2)*c_3 + c_4*rho**2 - (1/4)*c_5*rho**4)*eps**3 +
                                (-(3/8)*c_4 - (3/8)*c_5*rho**2 + (17/16)*c_6*rho**4 -
                                 (3/8)*c_7*rho**6 + (1/32)*c_8*rho**8)*eps**5)*np.exp(+1j*np.pi/2)*(x[k]/w_0)/c
         
         B_y_time = -1*pulse_prep*((c_2)*eps +
-                               (-(1/2)*c_3 + c_4*rho**2 - (1/4)*c_5*rho**4)*eps**4 +
+                               (-(1/2)*c_3 + c_4*rho**2 - (1/4)*c_5*rho**4)*eps**3 +
                                (-(3/8)*c_4 - (3/8)*c_5*rho**2 + (17/16)*c_6*rho**4 -
                                 (3/8)*c_7*rho**6 + (1/32)*c_8*rho**8)*eps**5)*np.exp(+1j*np.pi/2)*(y[k]/w_0)/c
 

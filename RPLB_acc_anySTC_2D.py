@@ -99,7 +99,7 @@ def RPLB_acc_anySTC_2D(lambda_0, tau_0, w_00, P, Psi_0, spec_phase_coeffs, LC_co
         E_z_time = np.sum(Amp*E_z_spec*trans)*omega_step/(delta_omega*np.sqrt(np.pi))
 
         E_x_spec = pulse_prep*((x[k]-x_omega)/w_0)*((c_2)*eps +
-                               (-(1/2)*c_3 + c_4*rho**2 - (1/4)*c_5*rho**4)*eps**4 +
+                               (-(1/2)*c_3 + c_4*rho**2 - (1/4)*c_5*rho**4)*eps**3 +
                                (-(3/8)*c_4 - (3/8)*c_5*rho**2 + (17/16)*c_6*rho**4 -
                                 (3/8)*c_7*rho**6 + (1/32)*c_8*rho**8)*eps**5)*np.exp(+1j*np.pi/2)
         E_x_time = np.sum(Amp*E_x_spec*trans)*omega_step/(delta_omega*np.sqrt(np.pi))
