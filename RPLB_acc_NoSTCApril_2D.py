@@ -65,7 +65,7 @@ def RPLB_acc_NoSTCApril_2D(lambda_0, s, a, P, Psi_0, t_0, z_0, r_0, beta_0):
         E_z_total = np.real(CEP_term * (Amp/(2*R_t)) * (((3*Ct**2 - 1)/R_t) * (Gm_zero/R_t + Gp_one/c) - (St**2*Gm_two/c**2)))
         E_r_total = np.real(CEP_term * (3*Amp*S2t/(4*R_t)) * ((Gm_zero/R_t**2) - (Gp_one/(c*R_t)) + (Gm_two/(3*c**2))))
         dot_product = v_z[k]*E_z_total + v_r[k]*E_r_total
-        B_t_total = np.real(CEP_term * (Amp*St/(2*c*R_t)) * ((Gm_one/(c*R_t)) - (Gp_two/c**2)))
+        B_t_total = np.real(-1*CEP_term * (Amp*St/(2*c*R_t)) * ((Gm_one/(c*R_t)) - (Gp_two/c**2)))
 
         deriv2[k] = (-q_e/(gamma[k]*m_e))*(E_z_total+v_r[k]*B_t_total-v_z[k]*dot_product/(c**2))  # Force in z
         deriv4[k] = (-q_e/(gamma[k]*m_e))*(E_r_total-v_z[k]*B_t_total-v_r[k]*dot_product/(c**2))  # Force in r
