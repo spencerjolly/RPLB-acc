@@ -2,7 +2,7 @@ import numpy as np
 from numba import jit
 
 @jit(nopython=True)
-def RPLB_acc_g0_2D(lambda_0, tau_0, w_00, P, Psi_0, phi_2, phi_3, z_0, r_0, beta_0, g_0):
+def RPLB_acc_g0_2D(lambda_0, tau_0, w_00, P, Psi_0, phi_2, phi_3, t_0, z_0, r_0, beta_0, g_0):
     # initialize constants (SI units)
     c = 2.99792458e8 #speed of light
     m_e = 9.10938356e-31
@@ -14,9 +14,10 @@ def RPLB_acc_g0_2D(lambda_0, tau_0, w_00, P, Psi_0, phi_2, phi_3, z_0, r_0, beta
     # calculate Rayleigh range
     z_R0 = (omega_0*w_00**2)/(2*c)
     
-    t_start = -50*tau_0
-    t_end = 1400*tau_0
-    n = 200  # number of time steps per laser period
+    t_start = t_0 + z_0/c
+    t_end = +1e5*tau_0
+    # number of time steps per laser period
+    n = (lambda_0/(0.8e-6))*200  # np.maximum(50, np.round(np.sqrt(P/(w_0**2))/(5e10)))  # empirically chosen resolution based on field strength
     num_t = np.int_(np.round(n*(t_end-t_start)/(lambda_0/c)))
     time = np.linspace(t_start, t_end, num_t)
     dt = time[1]-time[0]
@@ -41,6 +42,7 @@ def RPLB_acc_g0_2D(lambda_0, tau_0, w_00, P, Psi_0, phi_2, phi_3, z_0, r_0, beta
     v_z = np.empty(shape=(len(time)))
     v_r = np.empty(shape=(len(time)))
     gamma = np.empty(shape=(len(time)))
+    KE = np.zeros(shape=(len(time)))
     deriv2 = np.empty(shape=(len(time)))
     deriv4 = np.empty(shape=(len(time)))
 
@@ -49,6 +51,8 @@ def RPLB_acc_g0_2D(lambda_0, tau_0, w_00, P, Psi_0, phi_2, phi_3, z_0, r_0, beta
     v_z[0] = beta_0*c
     v_r[0] = 0.0
     gamma[0] = 1/np.sqrt(1-beta_0**2)
+    KE[0] = (gamma[0]-1)*m_e*c**2/q_e
+    k_stop = -1
 
     # do 5th order Adams-Bashforth finite difference method
     for k in range(0, len(time)-1):
@@ -120,6 +124,10 @@ def RPLB_acc_g0_2D(lambda_0, tau_0, w_00, P, Psi_0, phi_2, phi_3, z_0, r_0, beta
             v_r[k+1] = v_r[k] + dt*((1901/720)*deriv4[k]-(1387/360)*deriv4[k-1]+(109/30)*deriv4[k-2]-(637/360)*deriv4[k-3]+(251/720)*deriv4[k-4])
 
         gamma[k+1] = 1/np.sqrt(1-(v_z[k+1]**2+v_r[k+1]**2)/c**2)
+        KE[k+1] = (gamma[k+1]-1)*m_e*c**2/q_e
+           
+        if (time[k] > 300*tau_0 and np.mean(np.abs(np.diff(KE[k-np.int(10*n):k+1]))/(KE[k+1]*dt)) < 1e7):
+            k_stop = k+1
+            break
 
-    KE = (gamma-1)*m_e*c**2/q_e
-    return time, z, r, v_z, v_r, KE[-1]
+    return time[:k_stop], z[:k_stop], r[:k_stop], v_z[:k_stop], v_r[:k_stop], KE[:k_stop]
