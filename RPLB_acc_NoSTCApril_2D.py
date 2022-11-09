@@ -12,7 +12,7 @@ def RPLB_acc_NoSTCApril_2D(lambda_0, s, a, P, Psi_0, t_0, z_0, r_0, beta_0):
     omega_0 = 2*np.pi*c/lambda_0
     tau_0 = s*np.sqrt(np.exp(2/(s+1))-1)/omega_0
     # amplitude factor
-    Amp = np.sqrt(8*P/(np.pi*e_0*c))*a*c/omega_0
+    Amp = np.sqrt(8*P/(np.pi*e_0*c))*a*c/(2*omega_0)
     
     t_start = t_0 + z_0/c
     t_end = +1e5*tau_0
@@ -62,10 +62,10 @@ def RPLB_acc_NoSTCApril_2D(lambda_0, s, a, P, Psi_0, t_0, z_0, r_0, beta_0):
         S2t = 2*St*Ct
         CEP_term = np.exp(1j*(Psi_0+np.pi/2))
 
-        E_z_total = np.real(CEP_term * (Amp/(2*R_t)) * (((3*Ct**2 - 1)/R_t) * (Gm_zero/R_t + Gp_one/c) - (St**2*Gm_two/c**2)))
-        E_r_total = np.real(CEP_term * (3*Amp*S2t/(4*R_t)) * ((Gm_zero/R_t**2) - (Gp_one/(c*R_t)) + (Gm_two/(3*c**2))))
+        E_z_total = np.real(CEP_term * (Amp/R_t) * (((3*Ct**2 - 1)/R_t) * (Gm_zero/R_t + Gp_one/c) - (St**2*Gm_two/c**2)))
+        E_r_total = np.real(CEP_term * (3*Amp*S2t/(2*R_t)) * ((Gm_zero/R_t**2) + (Gp_one/(c*R_t)) + (Gm_two/(3*c**2))))
         dot_product = v_z[k]*E_z_total + v_r[k]*E_r_total
-        B_t_total = np.real(-1*CEP_term * (Amp*St/(2*c*R_t)) * ((Gm_one/(c*R_t)) - (Gp_two/c**2)))
+        B_t_total = np.real(CEP_term * (Amp*St/(c*R_t)) * ((Gm_one/(c*R_t)) + (Gp_two/c**2)))
 
         deriv2[k] = (-q_e/(gamma[k]*m_e))*(E_z_total+v_r[k]*B_t_total-v_z[k]*dot_product/(c**2))  # Force in z
         deriv4[k] = (-q_e/(gamma[k]*m_e))*(E_r_total-v_z[k]*B_t_total-v_r[k]*dot_product/(c**2))  # Force in r

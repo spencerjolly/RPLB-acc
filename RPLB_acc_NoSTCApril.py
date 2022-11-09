@@ -12,7 +12,7 @@ def RPLB_acc_NoSTCApril(lambda_0, s, a, P, Psi_0, t_0, z_0, beta_0):
     omega_0 = 2*np.pi*c/lambda_0
     tau_0 = s*np.sqrt(np.exp(2/(s+1))-1)/omega_0
     # amplitude factor
-    Amp = np.sqrt(8*P/(np.pi*e_0*c))*a*c/omega_0
+    Amp = np.sqrt(8*P/(np.pi*e_0*c))*a*c/(2*omega_0)
     
     t_start = t_0 + z_0/c
     t_end = +1e5*tau_0
@@ -44,7 +44,7 @@ def RPLB_acc_NoSTCApril(lambda_0, s, a, P, Psi_0, t_0, z_0, beta_0):
         f_one_m = (s+1)*(1j*omega_0/s)*(1-1j*omega_0*t_m/s)**(-(s+2))
         Gm_zero = f_zero_m - f_zero_p
         Gp_one = f_one_m + f_one_p
-        field_total = np.real(np.exp(1j*(Psi_0+np.pi/2))*(Amp/(z[k]+1j*a)**2)*(Gm_zero/(z[k]+1j*a)+Gp_one/c))
+        field_total = np.real(np.exp(1j*(Psi_0+np.pi/2))*(2*Amp/(z[k]+1j*a)**2)*(Gm_zero/(z[k]+1j*a)+Gp_one/c))
         deriv2[k] = (-q_e*np.real(field_total)*((1-beta[k]**2)**(3/2))/(m_e*c))
 
         if k==0:
