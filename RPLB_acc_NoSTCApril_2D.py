@@ -43,9 +43,9 @@ def RPLB_acc_NoSTCApril_2D(lambda_0, s, a, P, Psi_0, t_0, z_0, r_0, beta_0):
     # do 5th order Adams-Bashforth finite difference method
     for k in range(0, len(time)-1):
         
-        t_p = time[k] + z[k]/c + 2*1j*a/c
-        t_m = time[k] - z[k]/c
         R_t = np.sqrt(r[k]**2 + (z[k]+1j*a)**2)
+        t_p = time[k] + R_t/c + 1j*a/c
+        t_m = time[k] - R_t/c + 1j*a/c
         f_zero_p = (1-1j*omega_0*t_p/s)**(-(s+1))
         f_zero_m = (1-1j*omega_0*t_m/s)**(-(s+1))
         f_one_p = (s+1)*(1j*omega_0/s)*(1-1j*omega_0*t_p/s)**(-(s+2))
