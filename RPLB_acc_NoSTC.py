@@ -1,5 +1,5 @@
 import numpy as np
-from numba import jit, float64
+from numba import jit
 
 @jit(nopython=True)
 def RPLB_acc_NoSTC(lambda_0, tau_0, w_0, P, Psi_0, phi_2, t_0, z_0, beta_0):
