@@ -44,8 +44,9 @@ def RPLB_acc_LCApril(lambda_0, s, a, P, Psi_0, phi_2, phi_3, t_0, z_0, beta_0, t
     #do 5th order Adams-Bashforth finite difference method
     for k in range(0, len(time)-1):
 
-        Rt = z[k] - z_omega + 1j*a
-        pulse_spec = pulse_prep*(2*Amp*np.exp(-omega*a/c)/(Rt)**2)*(np.sin(omega*Rt/c)/Rt-omega*np.cos(omega*Rt/c)/c)
+        Rt = z[k] + 1j*a
+        Rtomega = z[k] - z_omega + 1j*a
+        pulse_spec = pulse_prep*(2*2*1j*Amp*np.exp(-omega*a/c)/(Rtomega)**2)*(np.sin(omega*Rt/c)/Rtomega-omega*np.cos(omega*Rt/c)/c)
         pulse_time = np.sum(pulse_spec*np.exp(1j*omega*time[k]))*omega_step/(delta_omega*np.sqrt(np.pi))
         field_total = np.exp(1j*(Psi_0+np.pi/2))*pulse_time
         
