@@ -12,7 +12,7 @@ def RPLB_acc_NoSTCApril_2D(lambda_0, s, a, P, Psi_0, t_0, z_0, r_0, beta_0):
     omega_0 = 2*np.pi*c/lambda_0
     tau_0 = s*np.sqrt(np.exp(2/(s+1))-1)/omega_0
     # amplitude factor
-    Amp = np.sqrt(8*P/(np.pi*e_0*c))*a*c/omega_0
+    Amp = -1*np.sqrt(8*P/(np.pi*e_0*c))*a*c/(2*omega_0)
     
     t_start = t_0 + z_0/c
     t_end = +1e5*tau_0
@@ -43,29 +43,29 @@ def RPLB_acc_NoSTCApril_2D(lambda_0, s, a, P, Psi_0, t_0, z_0, r_0, beta_0):
     # do 5th order Adams-Bashforth finite difference method
     for k in range(0, len(time)-1):
         
-        t_p = time[k] + z[k]/c + 2*1j*a/c
-        t_m = time[k] - z[k]/c
         R_t = np.sqrt(r[k]**2 + (z[k]+1j*a)**2)
+        t_p = time[k] + R_t/c + 1j*a/c
+        t_m = time[k] - R_t/c + 1j*a/c
         f_zero_p = (1-1j*omega_0*t_p/s)**(-(s+1))
         f_zero_m = (1-1j*omega_0*t_m/s)**(-(s+1))
         f_one_p = (s+1)*(1j*omega_0/s)*(1-1j*omega_0*t_p/s)**(-(s+2))
         f_one_m = (s+1)*(1j*omega_0/s)*(1-1j*omega_0*t_m/s)**(-(s+2))
         f_two_p = (s+2)*(s+1)*(1j*omega_0/s)**2 * (1-1j*omega_0*t_p/s)**(-(s+3))
         f_two_m = (s+2)*(s+1)*(1j*omega_0/s)**2 * (1-1j*omega_0*t_m/s)**(-(s+3))
-        Gm_zero = f_zero_m - f_zero_p
-        Gm_one = f_one_m - f_one_p
-        Gp_one = f_one_m + f_one_p
-        Gm_two = f_two_m - f_two_p
-        Gp_two = f_two_m + f_two_p
+        Gm_zero = f_zero_p - f_zero_m
+        Gm_one = f_one_p - f_one_m
+        Gp_one = f_one_p + f_one_m
+        Gm_two = f_two_p - f_two_m
+        Gp_two = f_two_p + f_two_m
         Ct = (z[k]+1j*a)/R_t
         St = r[k]/R_t
         S2t = 2*St*Ct
         CEP_term = np.exp(1j*(Psi_0+np.pi/2))
 
-        E_z_total = np.real(CEP_term * (Amp/(2*R_t)) * (((3*Ct**2 - 1)/R_t) * (Gm_zero/R_t + Gp_one/c) - (St**2*Gm_two/c**2)))
-        E_r_total = np.real(CEP_term * (3*Amp*S2t/(4*R_t)) * ((Gm_zero/R_t**2) - (Gp_one/(c*R_t)) + (Gm_two/(3*c**2))))
+        E_z_total = np.real(CEP_term * (Amp/R_t) * (((3*Ct**2 - 1)/R_t) * (Gm_zero/R_t - Gp_one/c) - (St**2*Gm_two/c**2)))
+        E_r_total = np.real(CEP_term * (3*Amp*S2t/(2*R_t)) * ((Gm_zero/R_t**2) - (Gp_one/(c*R_t)) + (Gm_two/(3*c**2))))
         dot_product = v_z[k]*E_z_total + v_r[k]*E_r_total
-        B_t_total = np.real(-1*CEP_term * (Amp*St/(2*c*R_t)) * ((Gm_one/(c*R_t)) - (Gp_two/c**2)))
+        B_t_total = np.real(CEP_term * (Amp*St/(c*R_t)) * ((Gm_one/(c*R_t)) - (Gp_two/c**2)))
 
         deriv2[k] = (-q_e/(gamma[k]*m_e))*(E_z_total+v_r[k]*B_t_total-v_z[k]*dot_product/(c**2))  # Force in z
         deriv4[k] = (-q_e/(gamma[k]*m_e))*(E_r_total-v_z[k]*B_t_total-v_r[k]*dot_product/(c**2))  # Force in r

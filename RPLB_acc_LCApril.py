@@ -2,7 +2,7 @@ import numpy as np
 from numba import jit
 
 @jit(nopython=True)
-def RPLB_acc_NoSTCApril(lambda_0, s, a, P, Psi_0, t_0, z_0, beta_0):
+def RPLB_acc_LCApril(lambda_0, s, a, P, Psi_0, phi_2, phi_3, t_0, z_0, beta_0, tau_p):
     # initialize constants (SI units)
     c = 2.99792458e8  # speed of light
     m_e = 9.10938356e-31
@@ -11,6 +11,7 @@ def RPLB_acc_NoSTCApril(lambda_0, s, a, P, Psi_0, t_0, z_0, beta_0):
     # calculate frequency properties
     omega_0 = 2*np.pi*c/lambda_0
     tau_0 = s*np.sqrt(np.exp(2/(s+1))-1)/omega_0
+    delta_omega = 2/tau_0
     # amplitude factor
     Amp = -1*np.sqrt(8*P/(np.pi*e_0*c))*a*c/(2*omega_0)
     
@@ -21,6 +22,13 @@ def RPLB_acc_NoSTCApril(lambda_0, s, a, P, Psi_0, t_0, z_0, beta_0):
     num_t = np.int_(np.round(n*(t_end-t_start)/(lambda_0/c)))
     time = np.linspace(t_start, t_end, num_t)
     dt = time[1]-time[0]
+    
+    omega = np.linspace((omega_0-4*delta_omega), (omega_0+4*delta_omega), 300)
+    omega_step = omega[1]-omega[0]
+    
+    pulse_temp = np.exp(-((omega-omega_0)/delta_omega)**2)
+    pulse_prep = pulse_temp*np.exp(-1j*((phi_2/2)*(omega-omega_0)**2 + (phi_3/6)*(omega-omega_0)**3))
+    z_omega = a*tau_p*(omega-omega_0)
 
     # initialize empty arrays
     z = np.zeros(shape=(len(time)))
@@ -36,15 +44,12 @@ def RPLB_acc_NoSTCApril(lambda_0, s, a, P, Psi_0, t_0, z_0, beta_0):
     #do 5th order Adams-Bashforth finite difference method
     for k in range(0, len(time)-1):
 
-        t_p = time[k] + np.sqrt((z[k]/c + 1j*a/c)**2) + 1j*a/c
-        t_m = time[k] - np.sqrt((z[k]/c + 1j*a/c)**2) + 1j*a/c
-        f_zero_p = (1-1j*omega_0*t_p/s)**(-(s+1))
-        f_zero_m = (1-1j*omega_0*t_m/s)**(-(s+1))
-        f_one_p = (s+1)*(1j*omega_0/s)*(1-1j*omega_0*t_p/s)**(-(s+2))
-        f_one_m = (s+1)*(1j*omega_0/s)*(1-1j*omega_0*t_m/s)**(-(s+2))
-        Gm_zero = f_zero_p - f_zero_m
-        Gp_one = f_one_p + f_one_m
-        field_total = np.real(np.exp(1j*(Psi_0+np.pi/2))*(2*Amp/(z[k]+1j*a)**2)*(Gm_zero/(z[k]+1j*a)-Gp_one/c))
+        Rt = np.sqrt((z[k] + 1j*a)**2)
+        Rtomega = np.sqrt((z[k] - z_omega + 1j*a)**2)
+        pulse_spec = pulse_prep*(2*2*1j*Amp*np.exp(-omega*a/c)/(Rtomega)**2)*(np.sin(omega*Rt/c)/Rtomega-omega*np.cos(omega*Rt/c)/c)
+        pulse_time = np.sum(pulse_spec*np.exp(1j*omega*time[k]))*omega_step/(delta_omega*np.sqrt(np.pi))
+        field_total = np.exp(1j*(Psi_0+np.pi/2))*pulse_time
+        
         deriv2[k] = (-q_e*np.real(field_total)*((1-beta[k]**2)**(3/2))/(m_e*c))
 
         if k==0:

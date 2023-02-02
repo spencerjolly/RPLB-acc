@@ -67,6 +67,7 @@ def APLB_acc_anySTC_3D(lambda_0, tau_0, w_00, P, Psi_0, spec_phase_coeffs, LC_co
     v_x = np.empty(shape=(len(time)))
     v_y = np.empty(shape=(len(time)))
     gamma = np.empty(shape=(len(time)))
+    KE = np.zeros(shape=(len(time)))
     deriv2 = np.empty(shape=(len(time)))
     deriv4 = np.empty(shape=(len(time)))
     deriv6 = np.empty(shape=(len(time)))
@@ -79,6 +80,8 @@ def APLB_acc_anySTC_3D(lambda_0, tau_0, w_00, P, Psi_0, spec_phase_coeffs, LC_co
     v_x[0] = 0.0
     v_y[0] = 0.0
     gamma[0] = 1/np.sqrt(1-beta_0**2)
+    KE[0] = ((1/np.sqrt(1-beta_0**2))-1)*m_e*c**2/q_e
+    k_stop = -1
 
     # do 5th order Adams-Bashforth finite difference method
     for k in range(0, len(time)-1):
@@ -175,6 +178,10 @@ def APLB_acc_anySTC_3D(lambda_0, tau_0, w_00, P, Psi_0, spec_phase_coeffs, LC_co
             v_y[k+1] = v_y[k] + dt*((1901/720)*deriv6[k]-(1387/360)*deriv6[k-1]+(109/30)*deriv6[k-2]-(637/360)*deriv6[k-3]+(251/720)*deriv6[k-4])
 
         gamma[k+1] = 1/np.sqrt(1-(v_z[k+1]**2+v_x[k+1]**2+v_y[k+1]**2)/c**2)
+        KE[k+1] = (gamma[k+1]-1)*m_e*c**2/q_e
 
-    KE = (gamma-1)*m_e*c**2/q_e
-    return time, z, x, y, v_z, v_x, v_y, KE
+        if (time[k] > 300*tau_0 and np.mean(np.abs(np.diff(KE[k-np.int(10*n):k+1]))/(KE[k+1]*dt)) < 1e7):
+            k_stop = k+1
+            break
+
+    return time[:k_stop], z[:k_stop], x[:k_stop], y[:k_stop], v_z[:k_stop], v_x[:k_stop], v_y[:k_stop], KE[:k_stop]
