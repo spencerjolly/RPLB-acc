@@ -18,7 +18,7 @@ def RPLB_acc_LCApril_2D(lambda_0, s, a, P, Psi_0, phi_2, phi_3, t_0, z_0, r_0, b
     t_start = t_0 + z_0/c
     t_end = +1e5*tau_0
     # number of time steps per laser period
-    n = (lambda_0/(0.8e-6))*50  # np.maximum(50, np.round(np.sqrt(P/(w_0**2))/(5e10)))  # empirically chosen resolution based on field strength
+    n = (lambda_0/(0.8e-6))*200  # np.maximum(50, np.round(np.sqrt(P/(w_0**2))/(5e10)))  # empirically chosen resolution based on field strength
     num_t = np.int_(np.round(n*(t_end-t_start)/(lambda_0/c)))
     time = np.linspace(t_start, t_end, num_t)
     dt = time[1]-time[0]
@@ -60,12 +60,12 @@ def RPLB_acc_LCApril_2D(lambda_0, s, a, P, Psi_0, phi_2, phi_3, t_0, z_0, r_0, b
         E_z_time = np.sum(E_z_spec*np.exp(1j*omega*time[k]))*omega_step/(delta_omega*np.sqrt(np.pi))
         E_z_total = np.real(np.exp(1j*(Psi_0+np.pi/2))*E_z_time)
         
-        E_r_spec = pulse_prep*(2*1j*Amp*np.exp(-omega*a/c))*(r[k]*(z[k] + 1j*a)/Rtomega**3)*(np.sin(omega*Rt/c)*(3/Rtomega**2 - (omega/c)**2) - 3*omega*np.cos(omega*Rt/c)/(Rtomega*c))
+        E_r_spec = pulse_prep*(2*1j*Amp*np.exp(-omega*a/c))*(r[k]*(z[k] - z_omega + 1j*a)/Rtomega**3)*(np.sin(omega*Rt/c)*(3/Rtomega**2 - (omega/c)**2) - 3*omega*np.cos(omega*Rt/c)/(Rtomega*c))
         
         E_r_time = np.sum(E_r_spec*np.exp(1j*omega*time[k]))*omega_step/(delta_omega*np.sqrt(np.pi))
         E_r_total = np.real(np.exp(1j*(Psi_0+np.pi/2))*E_r_time)
         
-        B_t_spec = pulse_prep*(2*1j*Amp*np.exp(-omega*a/c))*(0)*(0)
+        B_t_spec = pulse_prep*(2*1j*Amp*np.exp(-omega*a/c))*(1j*omega*r[k]/(c*Rtomega)**2)*(np.sin(omega*Rt/c)/Rtomega - omega*np.cos(omega*Rt/c)/c)
         
         B_t_time = np.sum(B_t_spec*np.exp(1j*omega*time[k]))*omega_step/(delta_omega*np.sqrt(np.pi))
         B_t_total = np.real(np.exp(1j*(Psi_0+np.pi/2))*B_t_time)

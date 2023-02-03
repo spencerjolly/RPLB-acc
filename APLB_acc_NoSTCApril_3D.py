@@ -2,7 +2,7 @@ import numpy as np
 from numba import jit
 
 @jit(nopython=True)
-def APLB_acc_NoSTC_3D(lambda_0, tau_0, w_0, P, Psi_0, phi_2, t_0, z_0, x_0, y_0, beta_0):
+def APLB_acc_NoSTCApril_3D(lambda_0, s, a, P, Psi_0, t_0, z_0, x_0, y_0, beta_0):
     # initialize constants (SI units)
     c = 2.99792458e8  # speed of light
     m_e = 9.10938356e-31
@@ -10,16 +10,9 @@ def APLB_acc_NoSTC_3D(lambda_0, tau_0, w_0, P, Psi_0, phi_2, t_0, z_0, x_0, y_0,
     e_0 = 8.85418782e-12
     # calculate frequency properties
     omega_0 = 2*np.pi*c/lambda_0
-    delta_omega = 2/tau_0
-    # calculate Rayleigh range
-    z_R = (omega_0*w_0**2)/(2*c)
-    # perturbation parameter
-    eps = w_0/z_R
+    tau_0 = s*np.sqrt(np.exp(2/(s+1))-1)/omega_0
     # amplitude factor
-    P_corr = 1 + 3*(eps/2)**2 + 9*(eps/2)**4
-    Amp = np.sqrt(8*P/(P_corr*np.pi*e_0*c)) * (omega_0/(2*c))
-    # stretched pulse duration
-    tau = np.sqrt(tau_0**2 + (2*phi_2/tau_0)**2)
+    Amp = -1*np.sqrt(8*P/(np.pi*e_0*c))*a*c/(2*omega_0)
     
     t_start = t_0 + z_0/c
     t_end = +1e5*tau_0
@@ -54,56 +47,35 @@ def APLB_acc_NoSTC_3D(lambda_0, tau_0, w_0, P, Psi_0, phi_2, t_0, z_0, x_0, y_0,
 
     # do 5th order Adams-Bashforth finite difference method
     for k in range(0, len(time)-1):
-
-        rho = np.sqrt(x[k]**2 + y[k]**2)/w_0
         
-        phi_G = np.arctan(z[k]/z_R)
-        w = w_0*np.sqrt(1+(z[k]/z_R)**2)
-        R_inv = z[k]/(z[k]**2 + z_R**2)
-        phi_norm = Psi_0-(omega_0/c)*(z[k]+(R_inv*(rho*w_0)**2)/2)+omega_0*time[k]
-        trans = np.exp(-(rho*w_0/w)**2)
-
-        c_2 = (w_0/w)**2 * np.exp(1j*(phi_norm + 2*phi_G))
-        c_3 = (w_0/w)**3 * np.exp(1j*(phi_norm + 3*phi_G))
-        c_4 = (w_0/w)**4 * np.exp(1j*(phi_norm + 4*phi_G))
-        c_5 = (w_0/w)**5 * np.exp(1j*(phi_norm + 5*phi_G))
-        c_6 = (w_0/w)**6 * np.exp(1j*(phi_norm + 6*phi_G))
-        c_7 = (w_0/w)**7 * np.exp(1j*(phi_norm + 7*phi_G))
-        c_8 = (w_0/w)**8 * np.exp(1j*(phi_norm + 8*phi_G))
+        R_t = np.sqrt(x[k]**2 + y[k]**2 + (z[k]+1j*a)**2)
+        t_p = time[k] + R_t/c + 1j*a/c
+        t_m = time[k] - R_t/c + 1j*a/c
+        f_zero_p = (1-1j*omega_0*t_p/s)**(-(s+1))
+        f_zero_m = (1-1j*omega_0*t_m/s)**(-(s+1))
+        f_one_p = (s+1)*(1j*omega_0/s)*(1-1j*omega_0*t_p/s)**(-(s+2))
+        f_one_m = (s+1)*(1j*omega_0/s)*(1-1j*omega_0*t_m/s)**(-(s+2))
+        f_two_p = (s+2)*(s+1)*(1j*omega_0/s)**2 * (1-1j*omega_0*t_p/s)**(-(s+3))
+        f_two_m = (s+2)*(s+1)*(1j*omega_0/s)**2 * (1-1j*omega_0*t_m/s)**(-(s+3))
+        Gm_zero = f_zero_p - f_zero_m
+        Gm_one = f_one_p - f_one_m
+        Gp_one = f_one_p + f_one_m
+        Gm_two = f_two_p - f_two_m
+        Gp_two = f_two_p + f_two_m
+        Ct = (z[k]+1j*a)/R_t
+        St = np.sqrt(x[k]**2 + y[k]**2)/R_t
+        S2t = 2*St*Ct
+        CEP_term = np.exp(1j*(Psi_0+np.pi/2))
         
-        env_temp = np.exp(-((phi_norm-Psi_0)/(omega_0*tau))**2)
-        temp_phase = np.exp(1j*(2*phi_2/(tau_0**4+(2*phi_2)**2))*(time[k]-z[k]/c)**2)
-        pulse_prep = (tau_0/tau)*env_temp*temp_phase
-
-        B_z_time = -1*pulse_prep*((c_2 - c_3*rho**2)*eps**2 +
-                               ((1/2)*c_3 + (1/2)*c_4*rho**2 - (5/4)*c_5*rho**4 + (1/4)*c_6*rho**6)*eps**4)/c
-
-        B_x_time = -1*pulse_prep*((c_2)*eps +
-                               (-(1/2)*c_3 + c_4*rho**2 - (1/4)*c_5*rho**4)*eps**3 +
-                               (-(3/8)*c_4 - (3/8)*c_5*rho**2 + (17/16)*c_6*rho**4 -
-                                (3/8)*c_7*rho**6 + (1/32)*c_8*rho**8)*eps**5)*np.exp(+1j*np.pi/2)*(x[k]/w_0)/c
+        B_z_total = -1*np.real(CEP_term * (Amp/R_t) * (((3*Ct**2 - 1)/R_t) * (Gm_zero/R_t - Gp_one/c) - (St**2*Gm_two/c**2)))/c
         
-        B_y_time = -1*pulse_prep*((c_2)*eps +
-                               (-(1/2)*c_3 + c_4*rho**2 - (1/4)*c_5*rho**4)*eps**3 +
-                               (-(3/8)*c_4 - (3/8)*c_5*rho**2 + (17/16)*c_6*rho**4 -
-                                (3/8)*c_7*rho**6 + (1/32)*c_8*rho**8)*eps**5)*np.exp(+1j*np.pi/2)*(y[k]/w_0)/c
-
-        E_x_time = pulse_prep*((c_2)*eps +
-                               ((1/2)*c_3 + (1/2)*c_4*rho**2 - (1/4)*c_5*rho**4)*eps**3 +
-                               ((3/8)*c_4 + (3/8)*c_5*rho**2 + (3/16)*c_6*rho**4 -
-                                (1/4)*c_7*rho**6 + (1/32)*c_8*rho**8)*eps**5)*np.exp(+1j*np.pi/2)*(-y[k]/w_0)
+        B_x_total = -1*np.real(CEP_term * (3*Amp*S2t/(2*R_t)) * ((Gm_zero/R_t**2) - (Gp_one/(c*R_t)) + (Gm_two/(3*c**2))))*(x[k]/np.sqrt(x[k]**2 + y[k]**2))/c
+        B_y_total = -1*np.real(CEP_term * (3*Amp*S2t/(2*R_t)) * ((Gm_zero/R_t**2) - (Gp_one/(c*R_t)) + (Gm_two/(3*c**2))))*(y[k]/np.sqrt(x[k]**2 + y[k]**2))/c
         
-        E_y_time = pulse_prep*((c_2)*eps +
-                               ((1/2)*c_3 + (1/2)*c_4*rho**2 - (1/4)*c_5*rho**4)*eps**3 +
-                               ((3/8)*c_4 + (3/8)*c_5*rho**2 + (3/16)*c_6*rho**4 -
-                                (1/4)*c_7*rho**6 + (1/32)*c_8*rho**8)*eps**5)*np.exp(+1j*np.pi/2)*(x[k]/w_0)
+        E_x_total = np.real(CEP_term * (Amp*St/(c*R_t)) * ((Gm_one/(c*R_t)) - (Gp_two/c**2)))*c*(-y[k]/np.sqrt(x[k]**2 + y[k]**2))
+        E_y_total = np.real(CEP_term * (Amp*St/(c*R_t)) * ((Gm_one/(c*R_t)) - (Gp_two/c**2)))*c*(x[k]/np.sqrt(x[k]**2 + y[k]**2))
 
-        B_z_total = np.real(Amp*trans*B_z_time)
-        E_x_total = np.real(Amp*trans*E_x_time)
-        E_y_total = np.real(Amp*trans*E_y_time)
         dot_product = v_x[k]*E_x_total + v_y[k]*E_y_total
-        B_x_total = np.real(Amp*trans*B_x_time)
-        B_y_total = np.real(Amp*trans*B_y_time)
 
         deriv2[k] = (-q_e/(gamma[k]*m_e))*(v_x[k]*B_y_total-v_y[k]*B_x_total-v_z[k]*dot_product/(c**2))  # Force in z
         deriv4[k] = (-q_e/(gamma[k]*m_e))*(E_x_total+v_y[k]*B_z_total-v_z[k]*B_y_total-v_x[k]*dot_product/(c**2))  # Force in x
