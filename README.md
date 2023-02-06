@@ -23,7 +23,7 @@ The general model used to produce the fields simulated here is from Ref. [4]. Th
 
 -The functions are all limited at the moment to Gaussian spectral profiles (except for the April model cases), effectively limiting the minimum pulse duration that can be properly simulated. For example with a wavelength of 800 nm the lower limit of the pulse duration in the g_0 functions is around 3-4 fs. There are other approximations in the LC and SC functions such that the pulse must be longer than few-cycle, limiting the applicablity of those functions to pulses as short as ~10 fs for an 800 nm wavelength.
 
--There are functions with 'APLB' that model azimuthally-polarized laser pulses, functions entitled 'RPeLG_acc_NoSTC.py' and 'RPLG_acc_NoSTC.py', and functions that use the 'April' model with STCs added. All of these functions are very experimental and should not necessarily be considered correct.
+-There are functions entitled 'RPeLG_acc_NoSTC.py' and 'RPLG_acc_NoSTC.py', and functions that use the 'April' model with STCs added. All of these functions are very experimental and should not necessarily be considered correct.
 
 <b>References:</b>
 
