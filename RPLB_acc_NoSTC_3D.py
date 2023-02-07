@@ -50,6 +50,7 @@ def RPLB_acc_NoSTC_3D(lambda_0, tau_0, w_0, P, Psi_0, phi_2, t_0, z_0, x_0, y_0,
     v_y[0] = 0.0
     gamma[0] = 1/np.sqrt(1-beta_0**2)
     KE[0] = ((1/np.sqrt(1-beta_0**2))-1)*m_e*c**2/q_e
+    k_stop = -1
 
     # do 5th order Adams-Bashforth finite difference method
     for k in range(0, len(time)-1):

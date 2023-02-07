@@ -12,6 +12,10 @@ def RPLB_acc_LCApril(lambda_0, s, a, P, Psi_0, phi_2, phi_3, t_0, z_0, beta_0, t
     omega_0 = 2*np.pi*c/lambda_0
     tau_0 = s*np.sqrt(np.exp(2/(s+1))-1)/omega_0
     delta_omega = 2/tau_0
+    k_0 = omega_0/c
+    # spatial parameters as a function of a
+    w_00 = (np.sqrt(2)/k_0)*np.sqrt(np.sqrt(1 + (k_0*a)**2) - 1)  # beam waist
+    z_R0 = (1/k_0)*(np.sqrt(1 + (k_0*a)**2) - 1)  # Raylegh range
     # amplitude factor
     Amp = -1*np.sqrt(8*P/(np.pi*e_0*c))*a*c/(2*omega_0)
     
@@ -28,7 +32,7 @@ def RPLB_acc_LCApril(lambda_0, s, a, P, Psi_0, phi_2, phi_3, t_0, z_0, beta_0, t
     
     pulse_temp = np.exp(-((omega-omega_0)/delta_omega)**2)
     pulse_prep = pulse_temp*np.exp(-1j*((phi_2/2)*(omega-omega_0)**2 + (phi_3/6)*(omega-omega_0)**3))
-    z_omega = a*tau_p*(omega-omega_0)
+    z_omega = z_R0*tau_p*(omega-omega_0)
 
     # initialize empty arrays
     z = np.zeros(shape=(len(time)))
