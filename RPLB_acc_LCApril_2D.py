@@ -56,20 +56,19 @@ def RPLB_acc_LCApril_2D(lambda_0, s, a, P, Psi_0, phi_2, phi_3, t_0, z_0, r_0, b
     #do 5th order Adams-Bashforth finite difference method
     for k in range(0, len(time)-1):
 
-        Rt = np.sqrt(r[k]**2 + (z[k] + 1j*a)**2)
-        Rtomega = np.sqrt(r[k]**2 + (z[k] - z_omega + 1j*a)**2)
+        Rt = np.sqrt(r[k]**2 + (z[k] - z_omega + 1j*a)**2)
         
-        E_z_spec = pulse_prep*(2*1j*Amp*np.exp(-omega*a/c)/(Rtomega)**2)*(np.sin(omega*Rt/c)*((2+(omega*r[k]/c)**2)/Rtomega - 3*r[k]**2/Rtomega**3)+np.cos(omega*Rt/c)*(3*omega*r[k]**2/(Rtomega**2*c)-2*omega/c))
+        E_z_spec = pulse_prep*(2*1j*Amp*np.exp(-omega*a/c)*np.exp(-1j*omega*z_omega/c)/(Rt)**2)*(np.sin(omega*Rt/c)*((2+(omega*r[k]/c)**2)/Rt - 3*r[k]**2/Rt**3)+np.cos(omega*Rt/c)*(3*omega*r[k]**2/(Rt**2*c)-2*omega/c))
         
         E_z_time = np.sum(E_z_spec*np.exp(1j*omega*time[k]))*omega_step/(delta_omega*np.sqrt(np.pi))
         E_z_total = np.real(np.exp(1j*(Psi_0+np.pi/2))*E_z_time)
         
-        E_r_spec = pulse_prep*(2*1j*Amp*np.exp(-omega*a/c))*(r[k]*(z[k] - z_omega + 1j*a)/Rtomega**3)*(np.sin(omega*Rt/c)*(3/Rtomega**2 - (omega/c)**2) - 3*omega*np.cos(omega*Rt/c)/(Rtomega*c))
+        E_r_spec = pulse_prep*(2*1j*Amp*np.exp(-omega*a/c))*np.exp(-1j*omega*z_omega/c)*(r[k]*(z[k] - z_omega + 1j*a)/Rt**3)*(np.sin(omega*Rt/c)*(3/Rt**2 - (omega/c)**2) - 3*omega*np.cos(omega*Rt/c)/(Rt*c))
         
         E_r_time = np.sum(E_r_spec*np.exp(1j*omega*time[k]))*omega_step/(delta_omega*np.sqrt(np.pi))
         E_r_total = np.real(np.exp(1j*(Psi_0+np.pi/2))*E_r_time)
         
-        B_t_spec = pulse_prep*(2*1j*Amp*np.exp(-omega*a/c))*(1j*omega*r[k]/(c*Rtomega)**2)*(np.sin(omega*Rt/c)/Rtomega - omega*np.cos(omega*Rt/c)/c)
+        B_t_spec = pulse_prep*(2*1j*Amp*np.exp(-omega*a/c))*np.exp(-1j*omega*z_omega/c)*(1j*omega*r[k]/(c*Rt)**2)*(np.sin(omega*Rt/c)/Rt - omega*np.cos(omega*Rt/c)/c)
         
         B_t_time = np.sum(B_t_spec*np.exp(1j*omega*time[k]))*omega_step/(delta_omega*np.sqrt(np.pi))
         B_t_total = np.real(np.exp(1j*(Psi_0+np.pi/2))*B_t_time)
