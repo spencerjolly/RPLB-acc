@@ -12,10 +12,6 @@ def RPLB_acc_LCApril(lambda_0, s, a, P, Psi_0, phi_2, phi_3, t_0, z_0, beta_0, t
     omega_0 = 2*np.pi*c/lambda_0
     tau_0 = s*np.sqrt(np.exp(2/(s+1))-1)/omega_0
     delta_omega = 2/tau_0
-    k_0 = omega_0/c
-    # spatial parameters as a function of a
-    w_00 = (np.sqrt(2)/k_0)*np.sqrt(np.sqrt(1 + (k_0*a)**2) - 1)  # beam waist
-    z_R0 = (1/k_0)*(np.sqrt(1 + (k_0*a)**2) - 1)  # Raylegh range
     # amplitude factor
     Amp = -1*np.sqrt(8*P/(np.pi*e_0*c))*a*c/(2*omega_0)
     
@@ -32,7 +28,8 @@ def RPLB_acc_LCApril(lambda_0, s, a, P, Psi_0, phi_2, phi_3, t_0, z_0, beta_0, t
     
     pulse_temp = np.exp(-((omega-omega_0)/delta_omega)**2)
     pulse_prep = pulse_temp*np.exp(-1j*((phi_2/2)*(omega-omega_0)**2 + (phi_3/6)*(omega-omega_0)**3))
-    z_omega = z_R0*tau_p*(omega-omega_0)
+    k = omega/c
+    z_omega = (np.sqrt((k*a)**2 + 1) + k*a)*tau_p*(omega-omega_0)/(2*k)
 
     # initialize empty arrays
     z = np.zeros(shape=(len(time)))
@@ -43,38 +40,38 @@ def RPLB_acc_LCApril(lambda_0, s, a, P, Psi_0, phi_2, phi_3, t_0, z_0, beta_0, t
     # Set initial conditions
     beta[0] = beta_0
     z[0] = beta[0]*c*time[0]+z_0
-    k_stop = -1
+    i_stop = -1
 
     #do 5th order Adams-Bashforth finite difference method
-    for k in range(0, len(time)-1):
+    for i in range(0, len(time)-1):
 
-        Rt = np.sqrt((z[k] - z_omega + 1j*a)**2)
-        pulse_spec = pulse_prep*(2*2*1j*Amp*np.exp(-omega*a/c)*np.exp(-1j*omega*z_omega/c)/(Rt)**2)*(np.sin(omega*Rt/c)/Rt-omega*np.cos(omega*Rt/c)/c)
-        pulse_time = np.sum(pulse_spec*np.exp(1j*omega*time[k]))*omega_step/(delta_omega*np.sqrt(np.pi))
+        Rt = np.sqrt((z[i] - z_omega + 1j*a)**2)
+        pulse_spec = pulse_prep*(2*2*1j*Amp*np.exp(-k*a)*np.exp(-1j*k*z_omega)/(Rt)**2)*(np.sin(k*Rt)/Rt-k*np.cos(k*Rt))
+        pulse_time = np.sum(pulse_spec*np.exp(1j*omega*time[i]))*omega_step/(delta_omega*np.sqrt(np.pi))
         field_total = np.exp(1j*(Psi_0+np.pi/2))*pulse_time
         
-        deriv2[k] = (-q_e*np.real(field_total)*((1-beta[k]**2)**(3/2))/(m_e*c))
+        deriv2[i] = (-q_e*np.real(field_total)*((1-beta[i]**2)**(3/2))/(m_e*c))
 
-        if k==0:
-            z[k+1] = z[k] + dt*c*beta[k]
-            beta[k+1] = beta[k] + dt*deriv2[k]
-        elif k==1:
-            z[k+1] = z[k] + dt*c*(1.5*beta[k]-0.5*beta[k-1])
-            beta[k+1] = beta[k] + dt*(1.5*deriv2[k]-0.5*deriv2[k-1])
-        elif k==2:
-            z[k+1] = z[k] + dt*c*((23/12)*beta[k]-(4/3)*beta[k-1]+(5/12)*beta[k-2])
-            beta[k+1] = beta[k] + dt*((23/12)*deriv2[k]-(4/3)*deriv2[k-1]+(5/12)*deriv2[k-2])
-        elif k==3:
-            z[k+1] = z[k] + dt*c*((55/24)*beta[k]-(59/24)*beta[k-1]+(37/24)*beta[k-2]-(3/8)*beta[k-3])
-            beta[k+1] = beta[k] + dt*((55/24)*deriv2[k]-(59/24)*deriv2[k-1]+(37/24)*deriv2[k-2]-(3/8)*deriv2[k-3])
+        if i==0:
+            z[i+1] = z[i] + dt*c*beta[i]
+            beta[i+1] = beta[i] + dt*deriv2[i]
+        elif i==1:
+            z[i+1] = z[i] + dt*c*(1.5*beta[i]-0.5*beta[i-1])
+            beta[i+1] = beta[i] + dt*(1.5*deriv2[i]-0.5*deriv2[i-1])
+        elif i==2:
+            z[i+1] = z[i] + dt*c*((23/12)*beta[i]-(4/3)*beta[i-1]+(5/12)*beta[i-2])
+            beta[i+1] = beta[i] + dt*((23/12)*deriv2[i]-(4/3)*deriv2[i-1]+(5/12)*deriv2[i-2])
+        elif i==3:
+            z[i+1] = z[i] + dt*c*((55/24)*beta[i]-(59/24)*beta[i-1]+(37/24)*beta[i-2]-(3/8)*beta[i-3])
+            beta[i+1] = beta[i] + dt*((55/24)*deriv2[i]-(59/24)*deriv2[i-1]+(37/24)*deriv2[i-2]-(3/8)*deriv2[i-3])
         else:
-            z[k+1] = z[k] + dt*c*((1901/720)*beta[k]-(1387/360)*beta[k-1]+(109/30)*beta[k-2]-(637/360)*beta[k-3]+(251/720)*beta[k-4])
-            beta[k+1] = beta[k] + dt*((1901/720)*deriv2[k]-(1387/360)*deriv2[k-1]+(109/30)*deriv2[k-2]-(637/360)*deriv2[k-3]+(251/720)*deriv2[k-4])
+            z[i+1] = z[i] + dt*c*((1901/720)*beta[i]-(1387/360)*beta[i-1]+(109/30)*beta[i-2]-(637/360)*beta[i-3]+(251/720)*beta[i-4])
+            beta[i+1] = beta[i] + dt*((1901/720)*deriv2[i]-(1387/360)*deriv2[i-1]+(109/30)*deriv2[i-2]-(637/360)*deriv2[i-3]+(251/720)*deriv2[i-4])
 
-        KE[k+1] = ((1/np.sqrt(1-beta[k+1]**2))-1)*m_e*c**2/q_e
+        KE[i+1] = ((1/np.sqrt(1-beta[i+1]**2))-1)*m_e*c**2/q_e
         
-        if (time[k] > 300*tau_0 and np.mean(np.abs(np.diff(KE[k-np.int(10*n):k+1]))/(KE[k+1]*dt)) < 1e7):
-            k_stop = k+1
+        if (time[i] > 300*tau_0 and np.mean(np.abs(np.diff(KE[i-np.int(10*n):i+1]))/(KE[i+1]*dt)) < 1e7):
+            i_stop = i+1
             break
 
-    return time[:k_stop], z[:k_stop], beta[:k_stop], KE[:k_stop]
+    return time[:i_stop], z[:i_stop], beta[:i_stop], KE[:i_stop]

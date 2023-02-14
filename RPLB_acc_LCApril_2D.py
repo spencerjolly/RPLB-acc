@@ -12,10 +12,6 @@ def RPLB_acc_LCApril_2D(lambda_0, s, a, P, Psi_0, phi_2, phi_3, t_0, z_0, r_0, b
     omega_0 = 2*np.pi*c/lambda_0
     tau_0 = s*np.sqrt(np.exp(2/(s+1))-1)/omega_0
     delta_omega = 2/tau_0
-    k_0 = omega_0/c
-    # spatial parameters as a function of a
-    w_00 = (np.sqrt(2)/k_0)*np.sqrt(np.sqrt(1 + (k_0*a)**2) - 1)  # beam waist
-    z_R0 = (1/k_0)*(np.sqrt(1 + (k_0*a)**2) - 1)  # Raylegh range
     # amplitude factor
     Amp = -1*np.sqrt(8*P/(np.pi*e_0*c))*a*c/(2*omega_0)
     
@@ -32,7 +28,8 @@ def RPLB_acc_LCApril_2D(lambda_0, s, a, P, Psi_0, phi_2, phi_3, t_0, z_0, r_0, b
     
     pulse_temp = np.exp(-((omega-omega_0)/delta_omega)**2)
     pulse_prep = pulse_temp*np.exp(-1j*((phi_2/2)*(omega-omega_0)**2 + (phi_3/6)*(omega-omega_0)**3))
-    z_omega = z_R0*tau_p*(omega-omega_0)
+    k = omega/c
+    z_omega = (np.sqrt((k*a)**2 + 1) + k*a)*tau_p*(omega-omega_0)/(2*k)
 
     # initialize empty arrays
     z = np.empty(shape=(len(time)))
@@ -51,64 +48,64 @@ def RPLB_acc_LCApril_2D(lambda_0, s, a, P, Psi_0, phi_2, phi_3, t_0, z_0, r_0, b
     v_r[0] = 0.0
     gamma[0] = 1/np.sqrt(1-beta_0**2)
     KE[0] = ((1/np.sqrt(1-beta_0**2))-1)*m_e*c**2/q_e
-    k_stop = -1
+    i_stop = -1
 
     #do 5th order Adams-Bashforth finite difference method
-    for k in range(0, len(time)-1):
+    for i in range(0, len(time)-1):
 
-        Rt = np.sqrt(r[k]**2 + (z[k] - z_omega + 1j*a)**2)
+        Rt = np.sqrt(r[i]**2 + (z[i] - z_omega + 1j*a)**2)
         
-        E_z_spec = pulse_prep*(2*1j*Amp*np.exp(-omega*a/c)*np.exp(-1j*omega*z_omega/c)/(Rt)**2)*(np.sin(omega*Rt/c)*((2+(omega*r[k]/c)**2)/Rt - 3*r[k]**2/Rt**3)+np.cos(omega*Rt/c)*(3*omega*r[k]**2/(Rt**2*c)-2*omega/c))
+        E_z_spec = pulse_prep*(2*1j*Amp*np.exp(-k*a)*np.exp(-1j*k*z_omega)/(Rt)**2)*(np.sin(k*Rt)*((2+(k*r[i])**2)/Rt - 3*r[i]**2/Rt**3)+np.cos(k*Rt)*(3*k*r[i]**2/(Rt**2)-2*k))
         
-        E_z_time = np.sum(E_z_spec*np.exp(1j*omega*time[k]))*omega_step/(delta_omega*np.sqrt(np.pi))
+        E_z_time = np.sum(E_z_spec*np.exp(1j*omega*time[i]))*omega_step/(delta_omega*np.sqrt(np.pi))
         E_z_total = np.real(np.exp(1j*(Psi_0+np.pi/2))*E_z_time)
         
-        E_r_spec = pulse_prep*(2*1j*Amp*np.exp(-omega*a/c))*np.exp(-1j*omega*z_omega/c)*(r[k]*(z[k] - z_omega + 1j*a)/Rt**3)*(np.sin(omega*Rt/c)*(3/Rt**2 - (omega/c)**2) - 3*omega*np.cos(omega*Rt/c)/(Rt*c))
+        E_r_spec = pulse_prep*(2*1j*Amp*np.exp(-k*a))*np.exp(-1j*k*z_omega)*(r[i]*(z[i] - z_omega + 1j*a)/Rt**3)*(np.sin(k*Rt)*(3/Rt**2 - k**2) - 3*k*np.cos(k*Rt)/Rt)
         
-        E_r_time = np.sum(E_r_spec*np.exp(1j*omega*time[k]))*omega_step/(delta_omega*np.sqrt(np.pi))
+        E_r_time = np.sum(E_r_spec*np.exp(1j*omega*time[i]))*omega_step/(delta_omega*np.sqrt(np.pi))
         E_r_total = np.real(np.exp(1j*(Psi_0+np.pi/2))*E_r_time)
         
-        B_t_spec = pulse_prep*(2*1j*Amp*np.exp(-omega*a/c))*np.exp(-1j*omega*z_omega/c)*(1j*omega*r[k]/(c*Rt)**2)*(np.sin(omega*Rt/c)/Rt - omega*np.cos(omega*Rt/c)/c)
+        B_t_spec = pulse_prep*(2*1j*Amp*np.exp(-k*a))*np.exp(-1j*k*z_omega)*(1j*k*r[i]/(c*Rt**2))*(np.sin(k*Rt)/Rt - k*np.cos(k*Rt))
         
-        B_t_time = np.sum(B_t_spec*np.exp(1j*omega*time[k]))*omega_step/(delta_omega*np.sqrt(np.pi))
+        B_t_time = np.sum(B_t_spec*np.exp(1j*omega*time[i]))*omega_step/(delta_omega*np.sqrt(np.pi))
         B_t_total = np.real(np.exp(1j*(Psi_0+np.pi/2))*B_t_time)
         
-        dot_product = v_z[k]*E_z_total + v_r[k]*E_r_total
+        dot_product = v_z[i]*E_z_total + v_r[i]*E_r_total
         
-        deriv2[k] = (-q_e/(gamma[k]*m_e))*(E_z_total+v_r[k]*B_t_total-v_z[k]*dot_product/(c**2))
-        deriv4[k] = (-q_e/(gamma[k]*m_e))*(E_r_total-v_z[k]*B_t_total-v_r[k]*dot_product/(c**2))
+        deriv2[i] = (-q_e/(gamma[i]*m_e))*(E_z_total+v_r[i]*B_t_total-v_z[i]*dot_product/(c**2))
+        deriv4[i] = (-q_e/(gamma[i]*m_e))*(E_r_total-v_z[i]*B_t_total-v_r[i]*dot_product/(c**2))
 
-        if k==0:
-            z[k+1] = z[k] + dt*v_z[k]
-            v_z[k+1] = v_z[k] + dt*deriv2[k]
-            r[k+1] = r[k] + dt*v_r[k]
-            v_r[k+1] = v_r[k] + dt*deriv4[k]
-        elif k==1:
-            z[k+1] = z[k] + dt*(1.5*v_z[k]-0.5*v_z[k-1])
-            v_z[k+1] = v_z[k] + dt*(1.5*deriv2[k]-0.5*deriv2[k-1])
-            r[k+1] = r[k] + dt*(1.5*v_r[k]-0.5*v_r[k-1])
-            v_r[k+1] = v_r[k] + dt*(1.5*deriv4[k]-0.5*deriv4[k-1])
-        elif k==2:
-            z[k+1] = z[k] + dt*((23/12)*v_z[k]-(4/3)*v_z[k-1]+(5/12)*v_z[k-2])
-            v_z[k+1] = v_z[k] + dt*((23/12)*deriv2[k]-(4/3)*deriv2[k-1]+(5/12)*deriv2[k-2])
-            r[k+1] = r[k] + dt*((23/12)*v_r[k]-(4/3)*v_r[k-1]+(5/12)*v_r[k-2])
-            v_r[k+1] = v_r[k] + dt*((23/12)*deriv4[k]-(4/3)*deriv4[k-1]+(5/12)*deriv4[k-2])
-        elif k==3:
-            z[k+1] = z[k] + dt*((55/24)*v_z[k]-(59/24)*v_z[k-1]+(37/24)*v_z[k-2]-(3/8)*v_z[k-3])
-            v_z[k+1] = v_z[k] + dt*((55/24)*deriv2[k]-(59/24)*deriv2[k-1]+(37/24)*deriv2[k-2]-(3/8)*deriv2[k-3])
-            r[k+1] = r[k] + dt*((55/24)*v_r[k]-(59/24)*v_r[k-1]+(37/24)*v_r[k-2]-(3/8)*v_r[k-3])
-            v_r[k+1] = v_r[k] + dt*((55/24)*deriv4[k]-(59/24)*deriv4[k-1]+(37/24)*deriv4[k-2]-(3/8)*deriv4[k-3])
+        if i==0:
+            z[i+1] = z[i] + dt*v_z[i]
+            v_z[i+1] = v_z[i] + dt*deriv2[i]
+            r[i+1] = r[i] + dt*v_r[i]
+            v_r[i+1] = v_r[i] + dt*deriv4[i]
+        elif i==1:
+            z[i+1] = z[i] + dt*(1.5*v_z[i]-0.5*v_z[i-1])
+            v_z[i+1] = v_z[i] + dt*(1.5*deriv2[i]-0.5*deriv2[i-1])
+            r[i+1] = r[i] + dt*(1.5*v_r[i]-0.5*v_r[i-1])
+            v_r[i+1] = v_r[i] + dt*(1.5*deriv4[i]-0.5*deriv4[i-1])
+        elif i==2:
+            z[i+1] = z[i] + dt*((23/12)*v_z[i]-(4/3)*v_z[i-1]+(5/12)*v_z[i-2])
+            v_z[i+1] = v_z[i] + dt*((23/12)*deriv2[i]-(4/3)*deriv2[i-1]+(5/12)*deriv2[i-2])
+            r[i+1] = r[i] + dt*((23/12)*v_r[i]-(4/3)*v_r[i-1]+(5/12)*v_r[i-2])
+            v_r[i+1] = v_r[i] + dt*((23/12)*deriv4[i]-(4/3)*deriv4[i-1]+(5/12)*deriv4[i-2])
+        elif i==3:
+            z[i+1] = z[i] + dt*((55/24)*v_z[i]-(59/24)*v_z[i-1]+(37/24)*v_z[i-2]-(3/8)*v_z[i-3])
+            v_z[i+1] = v_z[i] + dt*((55/24)*deriv2[i]-(59/24)*deriv2[i-1]+(37/24)*deriv2[i-2]-(3/8)*deriv2[i-3])
+            r[i+1] = r[i] + dt*((55/24)*v_r[i]-(59/24)*v_r[i-1]+(37/24)*v_r[i-2]-(3/8)*v_r[i-3])
+            v_r[i+1] = v_r[i] + dt*((55/24)*deriv4[i]-(59/24)*deriv4[i-1]+(37/24)*deriv4[i-2]-(3/8)*deriv4[i-3])
         else:
-            z[k+1] = z[k] + dt*((1901/720)*v_z[k]-(1387/360)*v_z[k-1]+(109/30)*v_z[k-2]-(637/360)*v_z[k-3]+(251/720)*v_z[k-4])
-            v_z[k+1] = v_z[k] + dt*((1901/720)*deriv2[k]-(1387/360)*deriv2[k-1]+(109/30)*deriv2[k-2]-(637/360)*deriv2[k-3]+(251/720)*deriv2[k-4])
-            r[k+1] = r[k] + dt*((1901/720)*v_r[k]-(1387/360)*v_r[k-1]+(109/30)*v_r[k-2]-(637/360)*v_r[k-3]+(251/720)*v_r[k-4])
-            v_r[k+1] = v_r[k] + dt*((1901/720)*deriv4[k]-(1387/360)*deriv4[k-1]+(109/30)*deriv4[k-2]-(637/360)*deriv4[k-3]+(251/720)*deriv4[k-4])
+            z[i+1] = z[i] + dt*((1901/720)*v_z[i]-(1387/360)*v_z[i-1]+(109/30)*v_z[i-2]-(637/360)*v_z[i-3]+(251/720)*v_z[i-4])
+            v_z[i+1] = v_z[i] + dt*((1901/720)*deriv2[i]-(1387/360)*deriv2[i-1]+(109/30)*deriv2[i-2]-(637/360)*deriv2[i-3]+(251/720)*deriv2[i-4])
+            r[i+1] = r[i] + dt*((1901/720)*v_r[i]-(1387/360)*v_r[i-1]+(109/30)*v_r[i-2]-(637/360)*v_r[i-3]+(251/720)*v_r[i-4])
+            v_r[i+1] = v_r[i] + dt*((1901/720)*deriv4[i]-(1387/360)*deriv4[i-1]+(109/30)*deriv4[i-2]-(637/360)*deriv4[i-3]+(251/720)*deriv4[i-4])
 
-        gamma[k+1] = 1/np.sqrt(1-(v_z[k+1]**2+v_r[k+1]**2)/c**2)
-        KE[k+1] = (gamma[k+1]-1)*m_e*c**2/q_e
+        gamma[i+1] = 1/np.sqrt(1-(v_z[i+1]**2+v_r[i+1]**2)/c**2)
+        KE[i+1] = (gamma[i+1]-1)*m_e*c**2/q_e
 
-        if (time[k] > 300*tau_0 and np.mean(np.abs(np.diff(KE[k-np.int(10*n):k+1]))/(KE[k+1]*dt)) < 1e7):
-            k_stop = k+1
+        if (time[i] > 300*tau_0 and np.mean(np.abs(np.diff(KE[i-np.int(10*n):i+1]))/(KE[i+1]*dt)) < 1e7):
+            i_stop = i+1
             break
 
-    return time[:k_stop], z[:k_stop], r[:k_stop], v_z[:k_stop], v_r[:k_stop], KE[:k_stop]
+    return time[:i_stop], z[:i_stop], r[:i_stop], v_z[:i_stop], v_r[:i_stop], KE[:i_stop]
