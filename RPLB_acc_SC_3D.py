@@ -2,7 +2,7 @@ import numpy as np
 from numba import jit
 
 @jit(nopython=True)
-def RPLB_acc_SC_3D(lambda_0, tau_0, w_0, P, Psi_0, phi_2, phi_3, z_0, x_0, y_0, beta_0, tau_t):
+def RPLB_acc_SC_3D(lambda_0, tau_0, w_0, P, Psi_0, phi_2, phi_3, t_0, z_0, x_0, y_0, beta_0, tau_t):
     # initialize constants (SI units)
     c = 2.99792458e8 #speed of light
     m_e = 9.10938356e-31
@@ -18,9 +18,9 @@ def RPLB_acc_SC_3D(lambda_0, tau_0, w_0, P, Psi_0, phi_2, phi_3, z_0, x_0, y_0, 
     P_corr = 1 + 3*(eps/2)**2 + 9*(eps/2)**4
     Amp = np.sqrt(8*P/(P_corr*np.pi*e_0*c)) * (omega_0/(2*c))
     
-    t_start = -50*tau_0
-    t_end = 600*tau_0
-    n = 200  # number of time steps per laser period
+    t_start = t_0 + z_0/c
+    t_end = 1e5*tau_0
+    n = (lambda_0/(0.8e-6))*600  # number of time steps per laser period
     num_t = np.int_(np.round(n*(t_end-t_start)/(lambda_0/c)))
     time = np.linspace(t_start, t_end, num_t)
     dt = time[1]-time[0]
