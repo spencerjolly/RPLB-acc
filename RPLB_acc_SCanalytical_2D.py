@@ -2,7 +2,7 @@ import numpy as np
 from numba import jit
 
 @jit(nopython=True)
-def RPLB_acc_SC_2D(lambda_0, tau_0, w_0, P, Psi_0, t_0, z_0, x_0, beta_0, tau_t):
+def RPLB_acc_SCanalytical_2D(lambda_0, tau_0, w_0, P, Psi_0, t_0, z_0, x_0, beta_0, tau_t):
     # initialize constants (SI units)
     c = 2.99792458e8 #speed of light
     m_e = 9.10938356e-31
@@ -14,6 +14,7 @@ def RPLB_acc_SC_2D(lambda_0, tau_0, w_0, P, Psi_0, t_0, z_0, x_0, beta_0, tau_t)
     # calculate Rayleigh range
     z_R = (omega_0*w_0**2)/(2*c)
     #perturbation parameter
+    b = w_0*tau_t/2
     eps = w_0/z_R
     # amplitude factor
     P_corr = 1 + 3*(eps/2)**2 + 9*(eps/2)**4
@@ -21,7 +22,7 @@ def RPLB_acc_SC_2D(lambda_0, tau_0, w_0, P, Psi_0, t_0, z_0, x_0, beta_0, tau_t)
     
     t_start = t_0 + z_0/c
     t_end = 1e5*tau_0
-      # number of time steps per laser period
+    # number of time steps per laser period
     n = (lambda_0/(0.8e-6))*200
     num_t = np.int_(np.round(n*(t_end-t_start)/(lambda_0/c)))
     time = np.linspace(t_start, t_end, num_t)
@@ -47,8 +48,6 @@ def RPLB_acc_SC_2D(lambda_0, tau_0, w_0, P, Psi_0, t_0, z_0, x_0, beta_0, tau_t)
     # do 5th order Adams-Bashforth finite difference method
     for k in range(0, len(time)-1):
 
-        rho = x[k]/w_0
-        b = w_0*tau_t/2
         qz = z[k] - 1j*z_R
         alpha = np.sqrt((1/delta_omega)**2 - 1j*omega_0*b**2/(2*c*qz))
         tp = time[k] - z[k]/c
@@ -67,18 +66,18 @@ def RPLB_acc_SC_2D(lambda_0, tau_0, w_0, P, Psi_0, t_0, z_0, x_0, beta_0, tau_t)
 
         env_temp = np.exp(-(tpp/(2*alpha))**2)
         phase_temp = np.exp(1j*(Psi_0+omega_0*x[k]**2/(2*c*qz)-omega_0*tp))
-        pulse_prep = Amp*c_2*env_temp*phase_temp
+        pulse_prep = (Amp/(delta_omega*alpha))*c_2*env_temp*phase_temp
 
         E_z_time = pulse_prep*eps**2*(1 - (c_1/w_0**2)*(x[k]**2 + b**2/(2*alpha**2) + 1j*x[k]*b*tpp/(alpha**2) - b**2*tpp**2/(4*alpha**4)))
         
-        E_x_time = 1j*pulse_prep*eps*(x[k] + 1j*b*tpp/(2*alpha**2))
+        E_x_time = 1j*pulse_prep*eps*(x[k] + 1j*b*tpp/(2*alpha**2))/w_0
         
         B_y_time = E_x_time/c
         
-        E_z_total = np.real(Amp*E_z_time)
-        E_x_total = np.real(Amp*E_x_time)
+        E_z_total = np.real(E_z_time)
+        E_x_total = np.real(E_x_time)
         dot_product = v_z[k]*E_z_total + v_x[k]*E_x_total
-        B_y_total = np.real(Amp*B_y_time)
+        B_y_total = np.real(B_y_time)
 
         deriv2[k] = (-q_e/(gamma[k]*m_e))*(E_z_total+v_x[k]*B_y_total-v_z[k]*dot_product/(c**2))
         deriv4[k] = (-q_e/(gamma[k]*m_e))*(E_x_total-v_z[k]*B_y_total-v_x[k]*dot_product/(c**2))
