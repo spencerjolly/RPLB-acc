@@ -2,7 +2,7 @@ import numpy as np
 from numba import jit
 
 @jit(nopython=True)
-def RPLB_acc_SCanalytical_2Dparax(lambda_0, tau_0, w_0, P, Psi_0, t_0, z_0, x_0, beta_0, tau_t):
+def RPLB_acc_SCanalytical_2D(lambda_0, tau_0, w_0, P, Psi_0, t_0, z_0, x_0, beta_0, tau_t):
     # initialize constants (SI units)
     c = 2.99792458e8 #speed of light
     m_e = 9.10938356e-31
@@ -59,16 +59,43 @@ def RPLB_acc_SCanalytical_2Dparax(lambda_0, tau_0, w_0, P, Psi_0, t_0, z_0, x_0,
 
         c_1 = (w_0*np.exp(1j*phi_G)/w)
         c_2 = (w_0*np.exp(1j*phi_G)/w)**2
+        c_3 = (w_0*np.exp(1j*phi_G)/w)**3
+        c_4 = (w_0*np.exp(1j*phi_G)/w)**4
+        c_5 = (w_0*np.exp(1j*phi_G)/w)**5
+        c_6 = (w_0*np.exp(1j*phi_G)/w)**6
+
+        gam = (-1j*alpha/b)*(x[k] + 1j*b*tpp/(2*alpha**2))
+        con = 1j*b/(2*alpha*w_0)
+
+        H_1 = 2*gam
+        H_2 = 4*gam**2 - 2
+        H_3 = 8*gam**3 - 12*gam
+        H_4 = 16*gam**4 - 48*gam**2 + 12
+        H_5 = 32*gam**5 - 160*gam**3 + 120*gam
+        H_6 = 64*gam**6 - 480*gam**4 + 720*gam**2 - 120
+        H_7 = 128*gam**7 - 1344*gam**5 + 3360*gam**3 - 1680*gam
+        H_9 = 256*gam**8 - 3584*gam**6 + 13440*gam**4 - 13440*gam**2 + 1680
 
         env_temp = np.exp(-(tpp/(2*alpha))**2)
         phase_temp = np.exp(1j*(Psi_0-omega_0*x[k]**2/(2*c*qz)+omega_0*tp))
         pulse_prep = (Amp/(delta_omega*alpha))*c_2*env_temp*phase_temp
 
-        E_z_time = pulse_prep*eps**2*(1 - (c_1/w_0**2)*(x[k]**2 + b**2/(2*alpha**2) + 1j*x[k]*b*tpp/(alpha**2) - b**2*tpp**2/(4*alpha**4)))
+        E_z_time = pulse_prep*eps**2*((1 + eps**2*c_1/2) \
+                                      - con**2*H_2*(c_1 - eps**2*c_2/2) \
+                                      - con**4*H_4*(5*eps**2*c_3/4) \
+                                      + con**6*H_6*(eps**2*c_4/4))
         
-        E_x_time = 1j*pulse_prep*eps*(x[k] + 1j*b*tpp/(2*alpha**2))/w_0
+        E_x_time = 1j*pulse_prep*eps*(con*H_1*(1 - eps**2*c_1/2 - eps**4*3*c_2/8) \
+                                      + con**3*H_3*(eps**2*c_2 - eps**4*3*c_3/8) \
+                                      - con**5*H_5*(eps**2*c_3/4 - eps**4*17*c_4/16) \
+                                      - con**7*H_7*(eps**4*3*c_5/8) \
+                                      + con**9*H_9*(eps**4*c_6/32))
         
-        B_y_time = E_x_time/c
+        B_y_time = 1j*pulse_prep*eps*(con*H_1*(1 + eps**2*c_1/2 + eps**4*3*c_2/8) \
+                                      + con**3*H_3*(eps**2*c_2/2 + eps**4*3*c_3/8) \
+                                      - con**5*H_5*(eps**2*c_3/4 - eps**4*3*c_4/16) \
+                                      - con**7*H_7*(eps**4*c_5/4) \
+                                      + con**9*H_9*(eps**4*c_6/32))/c
         
         E_z_total = np.real(E_z_time)
         E_x_total = np.real(E_x_time)
