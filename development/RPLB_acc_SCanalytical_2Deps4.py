@@ -2,7 +2,7 @@ import numpy as np
 from numba import jit
 
 @jit(nopython=True)
-def RPLB_acc_SCanalytical_2D(lambda_0, tau_0, w_0, P, Psi_0, t_0, z_0, x_0, beta_0, tau_t):
+def RPLB_acc_SCanalytical_2Deps4(lambda_0, tau_0, w_0, P, Psi_0, t_0, z_0, x_0, beta_0, tau_t):
     # initialize constants (SI units)
     c = 2.99792458e8 #speed of light
     m_e = 9.10938356e-31
@@ -85,13 +85,17 @@ def RPLB_acc_SCanalytical_2D(lambda_0, tau_0, w_0, P, Psi_0, t_0, z_0, x_0, beta
                                       - con**4*H_4*(5*eps**2*c_3/4) \
                                       + con**6*H_6*(eps**2*c_4/4))
         
-        E_x_time = -1j*pulse_prep*eps*(con*H_1*(1 - eps**2*c_1/2) \
-                                      + con**3*H_3*(eps**2*c_2) \
-                                      - con**5*H_5*(eps**2*c_3/4))
+        E_x_time = -1j*pulse_prep*eps*(con*H_1*(1 - eps**2*c_1/2 - eps**4*3*c_2/8) \
+                                      + con**3*H_3*(eps**2*c_2 - eps**4*3*c_3/8) \
+                                      - con**5*H_5*(eps**2*c_3/4 - eps**4*17*c_4/16) \
+                                      - con**7*H_7*(eps**4*3*c_5/8) \
+                                      + con**9*H_9*(eps**4*c_6/32))
         
-        B_y_time = -1j*pulse_prep*eps*(con*H_1*(1 + eps**2*c_1/2) \
-                                      + con**3*H_3*(eps**2*c_2/2) \
-                                      - con**5*H_5*(eps**2*c_3/4))/c
+        B_y_time = -1j*pulse_prep*eps*(con*H_1*(1 + eps**2*c_1/2 + eps**4*3*c_2/8) \
+                                      + con**3*H_3*(eps**2*c_2/2 + eps**4*3*c_3/8) \
+                                      - con**5*H_5*(eps**2*c_3/4 - eps**4*3*c_4/16) \
+                                      - con**7*H_7*(eps**4*c_5/4) \
+                                      + con**9*H_9*(eps**4*c_6/32))/c
         
         E_z_total = np.real(E_z_time)
         E_x_total = np.real(E_x_time)

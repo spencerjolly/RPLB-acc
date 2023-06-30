@@ -48,7 +48,7 @@ def RPLB_acc_SCanalytical_2Dparax(lambda_0, tau_0, w_0, P, Psi_0, t_0, z_0, x_0,
     # do 5th order Adams-Bashforth finite difference method
     for k in range(0, len(time)-1):
 
-        qz = z[k] + 1j*z_R
+        qz = z[k] - 1j*z_R
         alpha = np.sqrt((1/delta_omega)**2 - 1j*omega_0*b**2/(2*c*qz))
         tp = time[k] - z[k]/c
         tpp = tp + omega_0*b*x[k]/(c*qz) - (x[k]**2)*z[k]/(2*c*np.abs(qz)**2)
@@ -57,16 +57,16 @@ def RPLB_acc_SCanalytical_2Dparax(lambda_0, tau_0, w_0, P, Psi_0, t_0, z_0, x_0,
         w = w_0*np.sqrt(1+(z[k]/z_R)**2)
         trans = np.exp(-((x[k])/w)**2)
 
-        c_1 = (w_0*np.exp(1j*phi_G)/w)
-        c_2 = (w_0*np.exp(1j*phi_G)/w)**2
+        c_1 = (w_0*np.exp(-1j*phi_G)/w)
+        c_2 = (w_0*np.exp(-1j*phi_G)/w)**2
 
         env_temp = np.exp(-(tpp/(2*alpha))**2)
-        phase_temp = np.exp(1j*(Psi_0-omega_0*x[k]**2/(2*c*qz)+omega_0*tp))
+        phase_temp = np.exp(1j*(Psi_0+omega_0*x[k]**2/(2*c*qz)-omega_0*tp))
         pulse_prep = (Amp/(delta_omega*alpha))*c_2*env_temp*phase_temp
 
         E_z_time = pulse_prep*eps**2*(1 - (c_1/w_0**2)*(x[k]**2 + b**2/(2*alpha**2) + 1j*x[k]*b*tpp/(alpha**2) - b**2*tpp**2/(4*alpha**4)))
         
-        E_x_time = 1j*pulse_prep*eps*(x[k] + 1j*b*tpp/(2*alpha**2))/w_0
+        E_x_time = -1j*pulse_prep*eps*(x[k] + 1j*b*tpp/(2*alpha**2))/w_0
         
         B_y_time = E_x_time/c
         
