@@ -2,7 +2,7 @@ import numpy as np
 from numba import jit
 
 @jit(nopython=True)
-def RPLB_acc_SCanalytical_2D(lambda_0, tau_0, w_0, P, Psi_0, t_0, z_0, x_0, beta_0, tau_t):
+def RPLB_acc_SCanalytical_2Deps2(lambda_0, tau_0, w_0, P, Psi_0, t_0, z_0, x_0, beta_0, tau_t):
     # initialize constants (SI units)
     c = 2.99792458e8 #speed of light
     m_e = 9.10938356e-31
