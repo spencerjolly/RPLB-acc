@@ -49,9 +49,9 @@ def RPLB_acc_SCanalytical_2Dparax(lambda_0, tau_0, w_0, P, Psi_0, t_0, z_0, x_0,
     for k in range(0, len(time)-1):
 
         qz = z[k] - 1j*z_R
-        alpha = np.sqrt((1/delta_omega)**2 - 1j*omega_0*b**2/(2*c*qz))
+        alpha = np.sqrt((1/delta_omega)**2 - 1j*(omega_0*b**2 - 2*b*x[k])/(2*c*qz))
         tp = time[k] - z[k]/c
-        tpp = tp + omega_0*b*x[k]/(c*qz) - (x[k]**2)*z[k]/(2*c*np.abs(qz)**2)
+        tpp = tp + omega_0*b*x[k]/(c*qz) - (x[k]**2)/(2*c*qz)
 
         phi_G = np.arctan(z[k]/z_R)
         w = w_0*np.sqrt(1+(z[k]/z_R)**2)
