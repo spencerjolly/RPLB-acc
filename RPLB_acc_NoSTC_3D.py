@@ -21,7 +21,7 @@ def RPLB_acc_NoSTC_3D(lambda_0, tau_0, w_0, P, Psi_0, phi_2, t_0, z_0, x_0, y_0,
     # stretched pulse duration
     tau = np.sqrt(tau_0**2 + (2*phi_2/tau_0)**2)
     
-    t_start = t_0 + z_0/c
+    t_start = t_0 + z_0/(c*(1-beta_0))
     t_end = +1e5*tau_0
     n = 200  # number of time steps per laser period
     num_t = np.int_(np.round(n*(t_end-t_start)/(lambda_0/c)))

@@ -14,7 +14,7 @@ def RPLB_acc_g0_2D(lambda_0, tau_0, w_00, P, Psi_0, phi_2, phi_3, t_0, z_0, r_0,
     # calculate Rayleigh range
     z_R0 = (omega_0*w_00**2)/(2*c)
     
-    t_start = t_0 + z_0/c
+    t_start = t_0 + z_0/(c*(1-beta_0))
     t_end = +1e5*tau_0
     # number of time steps per laser period
     n = (lambda_0/(0.8e-6))*200  # np.maximum(50, np.round(np.sqrt(P/(w_0**2))/(5e10)))  # empirically chosen resolution based on field strength

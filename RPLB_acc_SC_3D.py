@@ -18,7 +18,7 @@ def RPLB_acc_SC_3D(lambda_0, tau_0, w_0, P, Psi_0, phi_2, phi_3, t_0, z_0, x_0, 
     P_corr = 1 + 3*(eps/2)**2 + 9*(eps/2)**4
     Amp = np.sqrt(8*P/(P_corr*np.pi*e_0*c)) * (omega_0/(2*c))
     
-    t_start = t_0 + z_0/c
+    t_start = t_0 + z_0/(c*(1-beta_0))
     t_end = 1e5*tau_0
     n = (lambda_0/(0.8e-6))*600  # number of time steps per laser period
     num_t = np.int_(np.round(n*(t_end-t_start)/(lambda_0/c)))

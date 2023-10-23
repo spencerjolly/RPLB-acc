@@ -2,7 +2,7 @@ import numpy as np
 from numba import jit
 
 @jit(nopython=True)
-def RPLB_acc_LC_2D(lambda_0, tau_0, w_0, P, Psi_0, phi_2, phi_3, z_0, r_0, beta_0, tau_p):
+def RPLB_acc_LC_2D(lambda_0, tau_0, w_0, P, Psi_0, phi_2, phi_3, t_0, z_0, r_0, beta_0, tau_p):
     # initialize constants (SI units)
     c = 2.99792458e8 #speed of light
     m_e = 9.10938356e-31
@@ -20,7 +20,7 @@ def RPLB_acc_LC_2D(lambda_0, tau_0, w_0, P, Psi_0, phi_2, phi_3, z_0, r_0, beta_
     # extended Rayleigh range
     z_R_e = tau_p*z_R*delta_omega
     
-    t_start = -50*tau_0
+    t_start = t_0 + z_0/(c*(1-beta_0))
     t_end = +1e5*tau_0
     n = (lambda_0/(0.8e-6))*200  # number of time steps per laser period
     num_t = np.int_(np.round(n*(t_end-t_start)/(lambda_0/c)))

@@ -18,7 +18,7 @@ def RPLB_acc_anySTC(lambda_0, tau_0, w_00, P, Psi_0, spec_phase_coeffs, LC_coeff
     # stretched pulse duration (approx)
     tau = np.sqrt(tau_0**2 + (2*spec_phase_coeffs[0]/tau_0)**2)
     
-    t_start = t_0 + z_0/c
+    t_start = t_0 + z_0/(c*(1-beta_0))
     t_end = 1e5*tau_0
     # number of time steps per laser period
     n = (lambda_0/(0.8e-6))*np.maximum(50, np.round(np.sqrt(P*tau_0/(tau*w_00**2))/(5e10)))  # empirically chosen resolution based on field strength
@@ -65,7 +65,7 @@ def RPLB_acc_anySTC(lambda_0, tau_0, w_00, P, Psi_0, spec_phase_coeffs, LC_coeff
 
     # Set initial conditions
     beta[0] = beta_0
-    z[0] = beta[0]*c*time[0]+z_0
+    z[0] = beta_0*c*time[0] + z_0
     k_stop = -1
 
     # do 5th order Adams-Bashforth finite difference method

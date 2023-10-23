@@ -15,7 +15,7 @@ def RPLB_acc_LCApril(lambda_0, s, a, P, Psi_0, phi_2, phi_3, t_0, z_0, beta_0, t
     # amplitude factor
     Amp = -1*np.sqrt(8*P/(np.pi*e_0*c))*a*c/(2*omega_0)
     
-    t_start = t_0 + z_0/c
+    t_start = t_0 + z_0/(c*(1-beta_0))
     t_end = +1e5*tau_0
     # number of time steps per laser period
     n = (lambda_0/(0.8e-6))*50  # np.maximum(50, np.round(np.sqrt(P/(w_0**2))/(5e10)))  # empirically chosen resolution based on field strength
@@ -39,7 +39,7 @@ def RPLB_acc_LCApril(lambda_0, s, a, P, Psi_0, phi_2, phi_3, t_0, z_0, beta_0, t
 
     # Set initial conditions
     beta[0] = beta_0
-    z[0] = beta[0]*c*time[0]+z_0
+    z[0] = beta_0*c*time[0] + z_0
     i_stop = -1
 
     #do 5th order Adams-Bashforth finite difference method
