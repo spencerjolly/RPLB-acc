@@ -51,7 +51,7 @@ def RPLB_acc_NoSTC_arbitrary(lambda_0, tau_0, a, P, Psi_0, phi_2, t_0, z_0, beta
 
         corr = np.sqrt(k_0)*k_0*np.sqrt(a)/np.sqrt(2)
 
-        field_temp = np.real(np.sum(d_alpha*corr*illum*np.exp(1j*phase)*apod*integrand1*integrand2))
+        field_temp = np.sum(d_alpha*corr*illum*np.exp(1j*phase)*apod*integrand1*integrand2)
 
         env_temp = np.exp(-((time[k]-z[k]/c)/tau)**2)
         temp_phase = np.exp(1j*(2*phi_2/(tau_0**4+(2*phi_2)**2))*(time[k]-z[k]/c)**2)
