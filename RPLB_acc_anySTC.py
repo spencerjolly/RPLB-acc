@@ -19,7 +19,7 @@ def RPLB_acc_anySTC(lambda_0, tau_0, w_00, P, Psi_0, spec_phase_coeffs, LC_coeff
     tau = np.sqrt(tau_0**2 + (2*spec_phase_coeffs[0]/tau_0)**2)
     
     t_start = t_0 + z_0/(c*(1-beta_0))
-    t_end = 1e5*tau_0
+    t_end = +1e5*tau_0
     # number of time steps per laser period
     n = (lambda_0/(0.8e-6))*np.maximum(50, np.round(np.sqrt(P*tau_0/(tau*w_00**2))/(5e10)))  # empirically chosen resolution based on field strength
     num_t = np.int_(np.round(n*(t_end-t_start)/(lambda_0/c)))
@@ -75,7 +75,7 @@ def RPLB_acc_anySTC(lambda_0, tau_0, w_00, P, Psi_0, spec_phase_coeffs, LC_coeff
         pulse_time = np.sum(pulse_spec*np.exp(1j*omega*time[k]))*omega_step/(delta_omega*np.sqrt(np.pi))
         field_total = Amp*np.exp(1j*Psi_0)*pulse_time
 
-        deriv2[k] = (-q_e*np.real(field_total)*((1-beta[k]**2)**(3/2))/(m_e*c))  # Force in z
+        deriv2[k] = (-q_e*np.real(field_total)*((1-beta[k]**2)**(3/2))/(m_e*c))  # Lorentz force in z
 
         if k==0:
             z[k+1] = z[k] + dt*c*beta[k]

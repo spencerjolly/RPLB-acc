@@ -33,10 +33,10 @@ def RPLB_acc_NoSTC_arbitrary(lambda_0, tau_0, a, P, Psi_0, phi_2, t_0, z_0, beta
 
     # Set initial conditions
     beta[0] = beta_0
-    z[0] = beta[0]*c*time[0]+z_0
+    z[0] = beta_0*c*time[0] + z_0
     k_stop = -1
 
-    #do 5th order Adams-Bashforth finite difference method
+    # do 5th order Adams-Bashforth finite difference method
     for k in range(0, len(time)-1):
         
         alpha = np.linspace(0, 1.0, 501)
@@ -56,7 +56,8 @@ def RPLB_acc_NoSTC_arbitrary(lambda_0, tau_0, a, P, Psi_0, phi_2, t_0, z_0, beta
         env_temp = np.exp(-((time[k]-z[k]/c)/tau)**2)
         temp_phase = np.exp(1j*(2*phi_2/(tau_0**4+(2*phi_2)**2))*(time[k]-z[k]/c)**2)
         field_total = Amp*(tau_0/tau)*field_temp*env_temp*temp_phase
-        deriv2[k] = (-q_e*np.real(field_total)*((1-beta[k]**2)**(3/2))/(m_e*c))
+        
+        deriv2[k] = (-q_e*np.real(field_total)*((1-beta[k]**2)**(3/2))/(m_e*c))  # Lorentz force in z
 
         if k==0:
             z[k+1] = z[k] + dt*c*beta[k]
