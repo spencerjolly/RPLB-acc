@@ -1,19 +1,8 @@
 import numpy as np
-#from scipy.special import eval_genlaguerre
-#from numba.extending import get_cython_function_address
 from numba import jit, njit
-#import ctypes
-
-#addr = get_cython_function_address("scipy.special.cython_special", "eval_genlaguerre")
-#functype = ctypes.CFUNCTYPE(ctypes.c_int, ctypes.c_double, ctypes.c_double)
-#eval_genlaguerre_fn = functype(addr)
-
-#@njit
-#def call_eval_genlaguerre(n, x):
-#    return eval_genlaguerre(n, np.int64(1), x)
 
 @jit(nopython=True)
-def RPLB_acc_NoSTC_arbitrary_alsointensity(lambda_0, tau_0, a, P, SP, PM, phi_2, t_0, z_0, beta_0):
+def RPLB_acc_NoSTC_arbitrary_alsointensity(lambda_0, tau_0, a0, P, SP, PM, phi_2, t_0, z_0, beta_0):
     # initialize constants (SI units)
     c = 2.99792458e8  # speed of light
     m_e = 9.10938356e-31
@@ -28,6 +17,8 @@ def RPLB_acc_NoSTC_arbitrary_alsointensity(lambda_0, tau_0, a, P, SP, PM, phi_2,
     Amp = np.sqrt(8*P/(np.pi*e_0*c*SP_norm))
     # stretched pulse duration
     tau = np.sqrt(tau_0**2 + (2*phi_2/tau_0)**2)
+    # scale size according to higher orders
+    a = a0*(2*np.where(SP)[0].max() + 1)
     
     t_start = t_0 + z_0/(c*(1-beta_0))
     t_end = +1e5*tau_0
@@ -60,10 +51,8 @@ def RPLB_acc_NoSTC_arbitrary_alsointensity(lambda_0, tau_0, a, P, SP, PM, phi_2,
                           (((2*scaling**2)**2 - 6*(2*scaling**2) + 6)/2)*SP[2]/np.sqrt(2+1) + \
                           ((-1*(2*scaling**2)**3 + 12*(2*scaling**2)**2 - 36*(2*scaling**2) + 24)/6)*SP[3]/np.sqrt(3+1) + \
                           (((2*scaling**2)**4 - 20*(2*scaling**2)**3 + 120*(2*scaling**2)**2 - 240*(2*scaling**2) + 120)/24)*SP[4]/np.sqrt(4+1) + \
-                          ((-1*(2*scaling**2)**5 + 30*(2*scaling**2)**4 - 300*(2*scaling**2)**3 + 1200*(2*scaling**2)**2 - 1800*(2*scaling**2) + 720)/120)*SP[5]/np.sqrt(5+1)# + \
-                          #call_eval_genlaguerre(np.int64(6), 2*scaling**2)*SP[6]/np.sqrt(6+1) + \
-                          #call_eval_genlaguerre(np.int64(7), 2*scaling**2)*SP[7]/np.sqrt(7+1) + \
-                          #call_eval_genlaguerre(np.int64(8), 2*scaling**2)*SP[8]/np.sqrt(8+1)
+                          ((-1*(2*scaling**2)**5 + 30*(2*scaling**2)**4 - 300*(2*scaling**2)**3 + 1200*(2*scaling**2)**2 - 1800*(2*scaling**2) + 720)/120)*SP[5]/np.sqrt(5+1) + \
+                          (((2*scaling**2)**6 - 42*(2*scaling**2)**5 + 630*(2*scaling**2)**4 - 4200*(2*scaling**2)**3 + 12600*(2*scaling**2)**2 - 15120*(2*scaling**2) + 5040)/720)*SP[6]/np.sqrt(6+1)
         phase = omega_0*time[k] + PM[0] + PM[1]*scaling + \
         		PM[2]*scaling**2 + PM[3]*scaling**3 + \
         		PM[4]*scaling**4 + PM[5]*scaling**5 + \
