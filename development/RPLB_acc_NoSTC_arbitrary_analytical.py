@@ -1,8 +1,19 @@
 import numpy as np
-from numba import jit
+from scipy.special import erfc
+#from numba.extending import get_cython_function_address
+from numba import jit, njit
+#import ctypes
+
+#addr = get_cython_function_address("scipy.special.cython_special", "erfc")
+#functype = ctypes.CFUNCTYPE(ctypes.c_double_complex, ctypes.c_double_complex)
+#erfc_fn = functype(addr)
+
+@njit
+def call_erfc(x):
+    return erfc(x)
 
 @jit(nopython=True)
-def RPLB_acc_anySTC_arbitrary(lambda_0, tau_0, a, P, PM, t_0, z_0, beta_0):
+def RPLB_acc_NoSTC_arbitrary_analytical(lambda_0, tau_0, a, P, Psi_0, phi_2, t_0, z_0, beta_0, spher):
     # initialize constants (SI units)
     c = 2.99792458e8  # speed of light
     m_e = 9.10938356e-31
@@ -10,11 +21,12 @@ def RPLB_acc_anySTC_arbitrary(lambda_0, tau_0, a, P, PM, t_0, z_0, beta_0):
     e_0 = 8.85418782e-12
     # calculate frequency properties
     omega_0 = 2*np.pi*c/lambda_0
+    k_0 = omega_0/c
     delta_omega = 2/tau_0
     # amplitude factor
     Amp = np.sqrt(8*P/(np.pi*e_0*c))
-    # stretched pulse duration (approx)
-    tau = np.sqrt(tau_0**2 + (2*PM[2,0]/tau_0)**2)
+    # stretched pulse duration
+    tau = np.sqrt(tau_0**2 + (2*phi_2/tau_0)**2)
     
     t_start = t_0 + z_0/(c*(1-beta_0))
     t_end = +1e5*tau_0
@@ -23,12 +35,6 @@ def RPLB_acc_anySTC_arbitrary(lambda_0, tau_0, a, P, PM, t_0, z_0, beta_0):
     num_t = np.int_(np.round(n*(t_end-t_start)/(lambda_0/c)))
     time = np.linspace(t_start, t_end, num_t)
     dt = time[1]-time[0]
-
-    omega = np.linspace((omega_0-4*delta_omega), (omega_0+4*delta_omega), 300)
-    omega_step = omega[1]-omega[0]
-    pulse_mid = np.zeros(shape=(len(omega)), dtype=np.complex128)
-
-    pulse_temp = np.exp(-((omega-omega_0)/delta_omega)**2)  # spectral envelope
 
     # initialize empty arrays
     z = np.zeros(shape=(len(time)))
@@ -44,32 +50,16 @@ def RPLB_acc_anySTC_arbitrary(lambda_0, tau_0, a, P, PM, t_0, z_0, beta_0):
     # do 5th order Adams-Bashforth finite difference method
     for k in range(0, len(time)-1):
         
-        for ii in range(0, len(omega)):
-            
-            alpha = np.linspace(0, 1.0, 501)
-            d_alpha = alpha[1]-alpha[0]
-            k_real = omega[ii]/c
-            scaling = np.sqrt(2*k_real*a)*np.tan(alpha/2)
-            illum = scaling*np.exp(-scaling**2)
-            phase = ((PM[0,0] + PM[0,1]*scaling + PM[0,2]*scaling**2 + PM[0,3]*scaling**3 + PM[0,4]*scaling**4) + \
-                     (PM[1,0] + PM[1,1]*scaling + PM[1,2]*scaling**2 + PM[1,3]*scaling**3 + PM[1,4]*scaling**4)*(omega[ii]-omega_0) + \
-                     (PM[2,0] + PM[2,1]*scaling + PM[2,2]*scaling**2 + PM[2,3]*scaling**3 + PM[2,4]*scaling**4)*((omega[ii]-omega_0)**2)/2 + \
-                     (PM[3,0] + PM[3,1]*scaling + PM[3,2]*scaling**2 + PM[3,3]*scaling**3 + PM[3,4]*scaling**4)*((omega[ii]-omega_0)**3)/6 + \
-                     (PM[4,0] + PM[4,1]*scaling + PM[4,2]*scaling**2 + PM[4,3]*scaling**3 + PM[4,4]*scaling**4)*((omega[ii]-omega_0)**4)/24)
-                        
-            apod = (1/np.cos(alpha/2))**(2)
+        term = (1-1j*z[k]/a)
+        const = (2*np.exp(-1j*k_0*z[k])/a)/(16*spher**(3/2))
+        E_z_spher = const*((1-1j)*np.sqrt(2*np.pi)*term*np.exp(1j*term**2/(4*spher))*call_erfc((term/2)*np.exp(1j*np.pi/4)*np.sqrt(1/(spher))) + 4*1j*np.sqrt(spher))
 
-            integrand1 = np.exp(-1j*k_real*z[k]*np.cos(alpha))
-            integrand2 = np.sin(alpha)**2
+        field_temp = np.sum(np.exp(1j*Psi_0)*E_z_spher)
 
-            corr = np.sqrt(k_real)*k_real*np.sqrt(a)/np.sqrt(2)
-
-            pulse_mid[ii] = np.sum(d_alpha*corr*illum*np.exp(1j*phase)*apod*integrand1*integrand2)
-
-        pulse_spec = pulse_temp*pulse_mid
-        pulse_time = np.sum(pulse_spec*np.exp(1j*omega*time[k]))*omega_step/(delta_omega*np.sqrt(np.pi))
-        field_total = Amp*pulse_time
-
+        env_temp = np.exp(-((time[k]-z[k]/c)/tau)**2)
+        temp_phase = np.exp(1j*(2*phi_2/(tau_0**4+(2*phi_2)**2))*(time[k]-z[k]/c)**2)
+        field_total = Amp*(tau_0/tau)*field_temp*env_temp*temp_phase
+        
         deriv2[k] = (-q_e*np.real(field_total)*((1-beta[k]**2)**(3/2))/(m_e*c))  # Lorentz force in z
 
         if k==0:
