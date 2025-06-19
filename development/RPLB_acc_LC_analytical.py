@@ -1,10 +1,21 @@
 import numpy as np
-from numba import jit
+from scipy.special import erfc
+#from numba.extending import get_cython_function_address
+from numba import jit, njit
+#import ctypes
+
+#addr = get_cython_function_address("scipy.special.cython_special", "erfc")
+#functype = ctypes.CFUNCTYPE(ctypes.c_double_complex, ctypes.c_double_complex)
+#erfc_fn = functype(addr)
+
+@njit
+def call_erfc(x):
+    return erfc(x)
 
 @jit(nopython=True)
-def RPLB_acc_LC(lambda_0, tau_0, w_0, P, Psi_0, phi_2, phi_3, t_0, z_0, beta_0, tau_p):
+def RPLB_acc_LC_analytical(lambda_0, tau_0, w_0, P, Psi_0, phi_2, phi_3, t_0, z_0, beta_0, tau_p):
     # initialize constants (SI units)
-    c = 2.99792458e8 #speed of light
+    c = 2.99792458e8  # speed of light
     m_e = 9.10938356e-31
     q_e = 1.60217662e-19
     e_0 = 8.85418782e-12
@@ -15,43 +26,39 @@ def RPLB_acc_LC(lambda_0, tau_0, w_0, P, Psi_0, phi_2, phi_3, t_0, z_0, beta_0, 
     z_R = (omega_0*w_0**2)/(2*c)
     # amplitude factor
     Amp = np.sqrt(8*P/(np.pi*e_0*c))
-    # extended Rayleigh range
-    z_R_e = tau_p*z_R*delta_omega
-    # stretched pulse duration (approx)
+    # stretched pulse duration
     tau = np.sqrt(tau_0**2 + (2*phi_2/tau_0)**2)
     
     t_start = t_0 + z_0/(c*(1-beta_0))
-    t_end = 1e5*tau_0
+    t_end = +1e5*tau_0
     # number of time steps per laser period
-    n = (lambda_0/(0.8e-6))*np.maximum(50, np.round(np.sqrt(P*tau_0/(tau*w_0**2))/(5e10)))  # (empirically chosen resolution based on field strength)
+    n = (lambda_0/(0.8e-6))*np.maximum(50, np.round(np.sqrt(P*tau_0/(tau*w_0**2))/(5e10)))  # empirically chosen resolution based on field strength
     num_t = np.int_(np.round(n*(t_end-t_start)/(lambda_0/c)))
     time = np.linspace(t_start, t_end, num_t)
     dt = time[1]-time[0]
 
-    omega = np.linspace((omega_0-4*delta_omega), (omega_0+4*delta_omega), 300)
-    omega_step = omega[1]-omega[0]
-
-    pulse_temp = np.exp(-((omega-omega_0)/delta_omega)**2)
-    pulse_prep = pulse_temp*np.exp(-1j*((phi_2/2)*(omega-omega_0)**2 + (phi_3/6)*(omega-omega_0)**3))
-    z_omega = z_R*tau_p*(omega-omega_0)
-
+    # initialize empty arrays
     z = np.zeros(shape=(len(time)))
     beta = np.zeros(shape=(len(time)))
     deriv2 = np.zeros(shape=(len(time)))
     KE = np.zeros(shape=(len(time)))
 
+    # Set initial conditions
     beta[0] = beta_0
-    z[0] = beta_0*c*time[0] + z_0
-    KE[0] = ((1/np.sqrt(1-beta_0**2))-1)*m_e*c**2/q_e
+    z[0] = beta[0]*c*time[0]+z_0
     k_stop = -1
 
-    # do 5th order Adams-Bashforth finite difference method
+    #do 5th order Adams-Bashforth finite difference method
     for k in range(0, len(time)-1):
+        t_prime = time[k]-z[k]/c
+        a = (1-1j*z[k]/z_R) - 2*tau_p*t_prime/tau**2
+        b = (tau_p/tau)**2
+        const = (2*np.exp(1j*omega_0*t_prime)/z_R)/(8*b**(3/2))
 
-        pulse_spec = pulse_prep*np.exp(1j*(2*np.arctan((z[k]-z_omega)/z_R)-omega*z[k]/c))/(z_R*(1+((z[k]-z_omega)/z_R)**2))
-        pulse_time = np.sum(pulse_spec*np.exp(1j*omega*time[k]))*omega_step/(delta_omega*np.sqrt(np.pi))
-        field_total = Amp*np.exp(1j*Psi_0)*pulse_time
-
+        field_temp = (-np.exp(1j*Psi_0)*np.sqrt(np.pi)*a*np.exp(a**2/(4*b))*call_erfc(a/(2*np.sqrt(b))) + 2*np.sqrt(b))
+        env_temp = np.exp(-(t_prime/tau)**2)
+        temp_phase = np.exp(1j*(2*phi_2/(tau_0**4+(2*phi_2)**2))*(time[k]-z[k]/c)**2)
+        field_total = Amp*(tau_0/tau)*field_temp*env_temp*temp_phase*const
         deriv2[k] = (-q_e*np.real(field_total)*((1-beta[k]**2)**(3/2))/(m_e*c))
 
         if k==0:

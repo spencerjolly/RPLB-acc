@@ -80,7 +80,7 @@ def RPLB_acc_SCanalytical_2Deps4(lambda_0, tau_0, w_0, P, Psi_0, t_0, z_0, x_0, 
         phase_temp = np.exp(1j*(Psi_0+omega_0*x[k]**2/(2*c*qz)-omega_0*tp))
         pulse_prep = (Amp/(delta_omega*alpha))*c_2*env_temp*phase_temp
 
-        E_z_time = pulse_prep*eps**2*((1 + eps**2*c_1/2) \
+        E_z_time = pulse_prep*eps**2*((1/2 + eps**2*c_1/2) \
                                       - con**2*H_2*(c_1 - eps**2*c_2/2) \
                                       - con**4*H_4*(5*eps**2*c_3/4) \
                                       + con**6*H_6*(eps**2*c_4/4))
