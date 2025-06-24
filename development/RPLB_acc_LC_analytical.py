@@ -21,7 +21,6 @@ def RPLB_acc_LC_analytical(lambda_0, tau_0, w_0, P, Psi_0, phi_2, phi_3, t_0, z_
     e_0 = 8.85418782e-12
     # calculate frequency properties
     omega_0 = 2*np.pi*c/lambda_0
-    delta_omega = 2/tau_0
     # calculate Rayleigh range
     z_R = (omega_0*w_0**2)/(2*c)
     # amplitude factor
@@ -48,18 +47,19 @@ def RPLB_acc_LC_analytical(lambda_0, tau_0, w_0, P, Psi_0, phi_2, phi_3, t_0, z_
     z[0] = beta[0]*c*time[0]+z_0
     k_stop = -1
 
+    alpha = tau_0**2 + 2*1j*phi_2
+    b = (tau_p**2)/alpha
+
     #do 5th order Adams-Bashforth finite difference method
     for k in range(0, len(time)-1):
-        t_prime = time[k]-z[k]/c
-        a = (1-1j*z[k]/z_R) - 2*tau_p*t_prime/tau**2
-        b = (tau_p/tau)**2
-        const = (2*np.exp(1j*omega_0*t_prime)/z_R)/(8*b**(3/2))
+        t_prime = time[k] - z[k]/c
+        a = (1 - 1j*z[k]/z_R) - 2*tau_p*t_prime/alpha
+        const = (tau_0/np.sqrt(alpha))*(2*np.exp(1j*omega_0*t_prime)/z_R)/(8*b**(3/2))
 
-        field_temp = (-np.exp(1j*Psi_0)*np.sqrt(np.pi)*a*np.exp(a**2/(4*b))*call_erfc(a/(2*np.sqrt(b))) + 2*np.sqrt(b))
-        env_temp = np.exp(-(t_prime/tau)**2)
-        temp_phase = np.exp(1j*(2*phi_2/(tau_0**4+(2*phi_2)**2))*(time[k]-z[k]/c)**2)
-        field_total = Amp*(tau_0/tau)*field_temp*env_temp*temp_phase*const
-        deriv2[k] = (-q_e*np.real(field_total)*((1-beta[k]**2)**(3/2))/(m_e*c))
+        field_temp = np.exp(1j*Psi_0)*(-1*np.sqrt(np.pi)*a*np.exp(a**2/(4*b))*call_erfc(a/(2*np.sqrt(b))) + 2*np.sqrt(b))
+        env_temp = np.exp(-(t_prime**2)/alpha)
+        field_total = Amp*field_temp*env_temp*const
+        deriv2[k] = (-q_e*np.real(field_total)*((1 - beta[k]**2)**(3/2))/(m_e*c))
 
         if k==0:
             z[k+1] = z[k] + dt*c*beta[k]
