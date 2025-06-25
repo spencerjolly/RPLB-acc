@@ -1,18 +1,19 @@
 import numpy as np
 from scipy.special import erfc
 #from numba.extending import get_cython_function_address
-from numba import jit, njit
+#from numba import jit, njit
 #import ctypes
+#import math
 
 #addr = get_cython_function_address("scipy.special.cython_special", "erfc")
 #functype = ctypes.CFUNCTYPE(ctypes.c_double_complex, ctypes.c_double_complex)
 #erfc_fn = functype(addr)
 
-@njit
-def call_erfc(x):
-    return erfc(x)
+#@njit
+#def call_erfc(x):
+#    return erfc(x)
 
-@jit(nopython=True)
+#@jit(nopython=True)
 def RPLB_acc_LC_analytical(lambda_0, tau_0, w_0, P, Psi_0, phi_2, phi_3, t_0, z_0, beta_0, tau_p):
     # initialize constants (SI units)
     c = 2.99792458e8  # speed of light
@@ -56,7 +57,7 @@ def RPLB_acc_LC_analytical(lambda_0, tau_0, w_0, P, Psi_0, phi_2, phi_3, t_0, z_
         a = (1 - 1j*z[k]/z_R) - 2*tau_p*t_prime/alpha
         const = (tau_0/np.sqrt(alpha))*(2*np.exp(1j*omega_0*t_prime)/z_R)/(8*b**(3/2))
 
-        field_temp = np.exp(1j*Psi_0)*(-1*np.sqrt(np.pi)*a*np.exp(a**2/(4*b))*call_erfc(a/(2*np.sqrt(b))) + 2*np.sqrt(b))
+        field_temp = np.exp(1j*Psi_0)*(-1*np.sqrt(np.pi)*a*np.exp(a**2/(4*b))*erfc(a/(2*np.sqrt(b))) + 2*np.sqrt(b))
         env_temp = np.exp(-(t_prime**2)/alpha)
         field_total = Amp*field_temp*env_temp*const
         deriv2[k] = (-q_e*np.real(field_total)*((1 - beta[k]**2)**(3/2))/(m_e*c))
