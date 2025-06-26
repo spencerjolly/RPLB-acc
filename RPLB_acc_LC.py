@@ -18,17 +18,17 @@ def RPLB_acc_LC(lambda_0, tau_0, w_0, P, Psi_0, phi_2, phi_3, t_0, z_0, beta_0, 
     # extended Rayleigh range
     z_R_e = tau_p*z_R*delta_omega
     # stretched pulse duration (approx)
-    tau = np.sqrt(tau_0**2 + (2*phi_2/tau_0)**2)
+    tau = np.sqrt(tau_0**2 + (2*phi_2/tau_0)**2 + tau_p**2)
     
     t_start = t_0 + z_0/(c*(1-beta_0))
-    t_end = 1e5*tau_0
+    t_end = 1e4*tau
     # number of time steps per laser period
     n = (lambda_0/(0.8e-6))*np.maximum(50, np.round(np.sqrt(P*tau_0/(tau*w_0**2))/(5e10)))  # (empirically chosen resolution based on field strength)
     num_t = np.int_(np.round(n*(t_end-t_start)/(lambda_0/c)))
     time = np.linspace(t_start, t_end, num_t)
     dt = time[1]-time[0]
 
-    omega = np.linspace((omega_0-4*delta_omega), (omega_0+4*delta_omega), 300)
+    omega = np.linspace((omega_0-5*delta_omega), (omega_0+5*delta_omega), 400*np.int_(tau/tau_0))
     omega_step = omega[1]-omega[0]
 
     pulse_temp = np.exp(-((omega-omega_0)/delta_omega)**2)
@@ -72,7 +72,7 @@ def RPLB_acc_LC(lambda_0, tau_0, w_0, P, Psi_0, phi_2, phi_3, t_0, z_0, beta_0, 
 
         KE[k+1] = ((1/np.sqrt(1-beta[k+1]**2))-1)*m_e*c**2/q_e
         
-        if (time[k] > 300*tau_0 and np.mean(np.abs(np.diff(KE[k-np.int_(10*n):k+1]))/(KE[k+1]*dt)) < 1e7):
+        if (time[k] > 20*tau and np.mean(np.abs(np.diff(KE[k-np.int_(10*n):k+1]))/(KE[k+1]*dt)) < 1e7):
             k_stop = k+1
             break
 
