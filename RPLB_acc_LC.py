@@ -20,7 +20,7 @@ def RPLB_acc_LC(lambda_0, tau_0, w_0, P, Psi_0, phi_2, phi_3, t_0, z_0, beta_0, 
     # stretched pulse duration (approx)
     tau = np.sqrt(tau_0**2 + (2*phi_2/tau_0)**2 + tau_p**2)
     
-    t_start = t_0 + z_0/(c*(1-beta_0))
+    t_start = t_0/(1-beta_0) + z_0/c
     t_end = 1e4*tau
     # number of time steps per laser period
     n = (lambda_0/(0.8e-6))*np.maximum(50, np.round(np.sqrt(P*tau_0/(tau*w_0**2))/(5e10)))  # (empirically chosen resolution based on field strength)
@@ -41,7 +41,7 @@ def RPLB_acc_LC(lambda_0, tau_0, w_0, P, Psi_0, phi_2, phi_3, t_0, z_0, beta_0, 
     KE = np.zeros(shape=(len(time)))
 
     beta[0] = beta_0
-    z[0] = beta_0*c*time[0] + z_0
+    z[0] = beta_0*c*time[0] + z_0*(1-beta_0)
     KE[0] = ((1/np.sqrt(1-beta_0**2))-1)*m_e*c**2/q_e
     k_stop = -1
 

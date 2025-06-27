@@ -17,7 +17,7 @@ def RPLB_acc_NoSTC_arbitrary(lambda_0, tau_0, a, P, PM, phi_2, t_0, z_0, beta_0)
     # stretched pulse duration
     tau = np.sqrt(tau_0**2 + (2*phi_2/tau_0)**2)
     
-    t_start = t_0 + z_0/(c*(1-beta_0))
+    t_start = t_0/(1-beta_0) + z_0/c
     t_end = +1e5*tau_0
     # number of time steps per laser period
     n = 50
@@ -33,7 +33,7 @@ def RPLB_acc_NoSTC_arbitrary(lambda_0, tau_0, a, P, PM, phi_2, t_0, z_0, beta_0)
 
     # Set initial conditions
     beta[0] = beta_0
-    z[0] = beta_0*c*time[0] + z_0
+    z[0] = beta_0*c*time[0] + z_0*(1-beta_0)
     k_stop = -1
 
     # do 5th order Adams-Bashforth finite difference method

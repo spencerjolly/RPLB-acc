@@ -20,7 +20,7 @@ def RPLB_acc_NoSTC_arbitrary_alsointensity(lambda_0, tau_0, a0, P, SP, PM, phi_2
     # scale size according to higher orders
     a = a0*(2*np.where(SP)[0].max() + 1)
     
-    t_start = t_0 + z_0/(c*(1-beta_0))
+    t_start = t_0/(1-beta_0) + z_0/c
     t_end = +1e5*tau_0
     # number of time steps per laser period
     n = 50
@@ -36,7 +36,7 @@ def RPLB_acc_NoSTC_arbitrary_alsointensity(lambda_0, tau_0, a0, P, SP, PM, phi_2
 
     # Set initial conditions
     beta[0] = beta_0
-    z[0] = beta_0*c*time[0] + z_0
+    z[0] = beta_0*c*time[0] + z_0*(1-beta_0)
     k_stop = -1
 
     # do 5th order Adams-Bashforth finite difference method
