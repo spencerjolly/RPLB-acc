@@ -20,7 +20,7 @@ def RPLB_acc_SCanalytical_2Deps4(lambda_0, tau_0, w_0, P, Psi_0, t_0, z_0, x_0, 
     P_corr = 1 + 3*(eps/2)**2 + 9*(eps/2)**4
     Amp = np.sqrt(8*P/(P_corr*np.pi*e_0*c)) * (omega_0/(2*c))
     
-    t_start = t_0 + z_0/(c*(1-beta_0))
+    t_start = t_0/(1-beta_0) + z_0/c
     t_end = 1e5*tau_0
     # number of time steps per laser period
     n = (lambda_0/(0.8e-6))*200
@@ -37,7 +37,7 @@ def RPLB_acc_SCanalytical_2Deps4(lambda_0, tau_0, w_0, P, Psi_0, t_0, z_0, x_0, 
     deriv2 = np.empty(shape=(len(time)))
     deriv4 = np.empty(shape=(len(time)))
 
-    z[0] = beta_0*c*time[0] + z_0
+    z[0] = beta_0*c*time[0] + z_0*(1-beta_0)
     x[0] = x_0
     v_z[0] = beta_0*c
     v_x[0] = 0.0
