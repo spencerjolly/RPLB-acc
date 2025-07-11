@@ -41,9 +41,9 @@ def RPLB_acc_LC_analytical(lambda_0, tau_0, w_0, P, Psi_0, phi_2, phi_3, t_0, z_
     for k in range(0, len(time)-1):
         t_prime = time[k] - z[k]/c
 
-        field_temp = np.exp(1j*(omega_0*t_prime - t_prime**2/(2*phi_2) + 2*np.arctan(z_test/z_R - tau_p*t_prime/phi_2)))
+        field_temp = np.exp(1j*(omega_0*t_prime - t_prime**2/(2*phi_2) + 2*np.arctan(z[k]/z_R - tau_p*t_prime/phi_2)))
         env_temp = np.exp(-(t_prime/(phi_2*delta_omega))**2)
-        const = np.exp(1j*Psi_0)*(1/(z_R*delta_omega*np.sqrt(np.pi)))*1/(1 + (z[k]/z_R - tau_p*t_prime/phi_2)**2)
+        const = np.exp(1j*Psi_0)*(1/(z_R*delta_omega*np.sqrt(phi_2/(2*1j))))/(1 + (z[k]/z_R - tau_p*t_prime/phi_2)**2)
         field_total = Amp*field_temp*env_temp*const
         deriv2[k] = (-q_e*np.real(field_total)*((1 - beta[k]**2)**(3/2))/(m_e*c))
 
