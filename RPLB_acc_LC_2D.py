@@ -43,7 +43,7 @@ def RPLB_acc_LC_2D(lambda_0, tau_0, w_0, P, Psi_0, phi_2, phi_3, t_0, z_0, r_0, 
     deriv2 = np.empty(shape=(len(time)))
     deriv4 = np.empty(shape=(len(time)))
 
-    z[0] = beta_0*c*time[0] + z_0
+    z[0] = beta_0*c*time[0] + z_0*(1-beta_0)
     r[0] = r_0
     v_z[0] = beta_0*c
     v_r[0] = 0.0

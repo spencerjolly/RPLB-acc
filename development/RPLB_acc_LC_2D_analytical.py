@@ -2,7 +2,7 @@ import numpy as np
 from numba import jit
 
 @jit(nopython=True)
-def RPLB_acc_NoSTC_2D(lambda_0, tau_0, w_0, P, Psi_0, phi_2, t_0, z_0, r_0, beta_0):
+def RPLB_acc_LC_2D_analytical(lambda_0, tau_0, w_0, P, Psi_0, phi_2, phi_3, t_0, z_0, r_0, beta_0, tau_p):
     # initialize constants (SI units)
     c = 2.99792458e8  # speed of light
     m_e = 9.10938356e-31
@@ -21,10 +21,10 @@ def RPLB_acc_NoSTC_2D(lambda_0, tau_0, w_0, P, Psi_0, phi_2, t_0, z_0, r_0, beta
     # stretched pulse duration
     tau = np.sqrt(tau_0**2 + (2*phi_2/tau_0)**2)
     
-    t_start = t_0 + z_0/(c*(1-beta_0))
+    t_start = t_0/(1-beta_0) + z_0/c
     t_end = +1e5*tau_0
     # number of time steps per laser period
-    n = (lambda_0/(0.8e-6))*200  # np.maximum(50, np.round(np.sqrt(P/(w_0**2))/(5e10)))  # empirically chosen resolution based on field strength
+    n = (lambda_0/(0.8e-6))*np.maximum(50, np.round(np.sqrt(P*tau_0/(tau*w_0**2))/(5e10)))  # empirically chosen resolution based on field strength
     num_t = np.int_(np.round(n*(t_end-t_start)/(lambda_0/c)))
     time = np.linspace(t_start, t_end, num_t)
     dt = time[1]-time[0]
@@ -39,6 +39,7 @@ def RPLB_acc_NoSTC_2D(lambda_0, tau_0, w_0, P, Psi_0, phi_2, t_0, z_0, r_0, beta
     deriv2 = np.zeros(shape=(len(time)))
     deriv4 = np.zeros(shape=(len(time)))
 
+    # Set initial conditions
     z[0] = beta_0*c*time[0] + z_0*(1-beta_0)
     r[0] = r_0
     v_z[0] = beta_0*c
@@ -47,15 +48,17 @@ def RPLB_acc_NoSTC_2D(lambda_0, tau_0, w_0, P, Psi_0, phi_2, t_0, z_0, r_0, beta
     KE[0] = (gamma[0]-1)*m_e*c**2/q_e
     k_stop = -1
 
-    # do 5th order Adams-Bashforth finite difference method
+    #do 5th order Adams-Bashforth finite difference method
     for k in range(0, len(time)-1):
-        
+        t_prime = time[k] - z[k]/c
         rho = r[k]/w_0
-        
-        phi_G = np.arctan(z[k]/z_R)
-        w = w_0*np.sqrt(1+(z[k]/z_R)**2)
+
+        const = (1/(delta_omega*np.sqrt(phi_2/(2*1j))))
+
+        phi_G = np.arctan(z[k]/z_R - tau_p*t_prime/phi_2)
+        w = w_0*np.sqrt(1+(z[k]/z_R - tau_p*t_prime/phi_2)**2)
         R_inv = z[k]/(z[k]**2 + z_R**2)
-        phi_norm = Psi_0-(omega_0/c)*(z[k]+(R_inv*(rho*w_0)**2)/2)+omega_0*time[k]
+        phi_norm = Psi_0 - (omega_0/c)*(R_inv*(rho*w_0)**2)/2 + omega_0*t_prime - t_prime**2/(2*phi_2)
         trans = np.exp(-(rho*w_0/w)**2)
 
         c_2 = (w_0/w)**2 * np.exp(1j*(phi_norm + 2*phi_G))
@@ -66,9 +69,9 @@ def RPLB_acc_NoSTC_2D(lambda_0, tau_0, w_0, P, Psi_0, phi_2, t_0, z_0, r_0, beta
         c_7 = (w_0/w)**7 * np.exp(1j*(phi_norm + 7*phi_G))
         c_8 = (w_0/w)**8 * np.exp(1j*(phi_norm + 8*phi_G))
 
-        env_temp = np.exp(-((phi_norm-Psi_0)/(omega_0*tau))**2)
-        temp_phase = np.exp(1j*(2*phi_2/(tau_0**4+(2*phi_2)**2))*(time[k]-z[k]/c)**2)
-        pulse_prep = (tau_0/tau)*env_temp*temp_phase
+        env_temp = np.exp(-(t_prime/(phi_2*delta_omega))**2)  # leftover from 1D case with LC
+        env_temp = np.exp(-((phi_norm-Psi_0)/(omega_0*tau))**2)  # leftover from 2D case no STC
+        pulse_prep = const*env_temp
 
         E_z_time = pulse_prep*((c_2 - c_3*rho**2)*eps**2 +
                                ((1/2)*c_3 + (1/2)*c_4*rho**2 - (5/4)*c_5*rho**4 + (1/4)*c_6*rho**6)*eps**4)
