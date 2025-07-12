@@ -58,7 +58,7 @@ def RPLB_acc_LC_2D_analytical(lambda_0, tau_0, w_0, P, Psi_0, phi_2, phi_3, t_0,
         phi_G = np.arctan(z[k]/z_R - tau_p*t_prime/phi_2)
         w = w_0*np.sqrt(1+(z[k]/z_R - tau_p*t_prime/phi_2)**2)
         R_inv = z[k]/(z[k]**2 + z_R**2)
-        phi_norm = Psi_0 - (omega_0/c)*(R_inv*(rho*w_0)**2)/2 + omega_0*t_prime - t_prime**2/(2*phi_2)
+        phi_norm = Psi_0 + omega_0*t_prime + t_prime**2/(2*phi_2) - (omega_0 + t_prime/phi_2)*(R_inv*(rho*w_0)**2)/(2*c)
         trans = np.exp(-(rho*w_0/w)**2)
 
         c_2 = (w_0/w)**2 * np.exp(1j*(phi_norm + 2*phi_G))
@@ -69,8 +69,7 @@ def RPLB_acc_LC_2D_analytical(lambda_0, tau_0, w_0, P, Psi_0, phi_2, phi_3, t_0,
         c_7 = (w_0/w)**7 * np.exp(1j*(phi_norm + 7*phi_G))
         c_8 = (w_0/w)**8 * np.exp(1j*(phi_norm + 8*phi_G))
 
-        env_temp = np.exp(-(t_prime/(phi_2*delta_omega))**2)  # leftover from 1D case with LC
-        env_temp = np.exp(-((phi_norm-Psi_0)/(omega_0*tau))**2)  # leftover from 2D case no STC
+        env_temp = np.exp(-(t_prime/(phi_2*delta_omega))**2)
         pulse_prep = const*env_temp
 
         E_z_time = pulse_prep*((c_2 - c_3*rho**2)*eps**2 +
