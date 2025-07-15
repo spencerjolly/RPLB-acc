@@ -55,10 +55,11 @@ def RPLB_acc_LC_2D_analytical(lambda_0, tau_0, w_0, P, Psi_0, phi_2, t_0, z_0, r
 
         const = (1/(delta_omega*np.sqrt(phi_2/(2*1j))))
 
-        phi_G = np.arctan(z[k]/z_R - tau_p*t_prime/phi_2)
-        w = w_0*np.sqrt(1+(z[k]/z_R - tau_p*t_prime/phi_2)**2)
-        R_inv = z[k]/(z[k]**2 + z_R**2)
-        phi_norm = Psi_0 + omega_0*t_prime + t_prime**2/(2*phi_2) - (omega_0 + t_prime/phi_2)*(R_inv*(rho*w_0)**2)/(2*c)
+        g = z[k]/z_R - tau_p*t_prime/phi_2
+        phi_G = np.arctan(g)
+        w = w_0*np.sqrt(1 + g**2)
+        R_inv = g/(1 + g**2)
+        phi_norm = Psi_0 + omega_0*t_prime + t_prime**2/(2*phi_2) - (1 + t_prime/(omega_0*phi_2))*(R_inv*rho**2)
         trans = np.exp(-(rho*w_0/w)**2)
 
         c_2 = (w_0/w)**2 * np.exp(1j*(phi_norm + 2*phi_G))
