@@ -55,11 +55,10 @@ def RPLB_acc_NoSTC_arbitrary(lambda_0, tau_0, a, P, PM, phi_2, t_0, z_0, beta_0)
 
         corr = np.sqrt(k_0)*k_0*np.sqrt(a)/np.sqrt(2)
 
-        field_temp = np.sum(d_alpha*corr*illum*np.exp(1j*phase)*apod*integrand1*integrand2)
+        field_temp = np.sum(np.exp(-((phase/omega_0-z[k]/c)/tau)**2)*d_alpha*corr*illum*np.exp(1j*phase)*apod*integrand1*integrand2)
 
-        env_temp = np.exp(-((time[k]-z[k]/c)/tau)**2)
         temp_phase = np.exp(1j*(2*phi_2/(tau_0**4+(2*phi_2)**2))*(time[k]-z[k]/c)**2)
-        field_total = Amp*(tau_0/tau)*field_temp*env_temp*temp_phase
+        field_total = Amp*(tau_0/tau)*field_temp*temp_phase
         
         deriv2[k] = (-q_e*np.real(field_total)*((1-beta[k]**2)**(3/2))/(m_e*c))  # Lorentz force in z
 
