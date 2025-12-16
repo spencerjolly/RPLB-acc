@@ -43,19 +43,19 @@ def RPLB_acc_NoSTC_arbitrary(lambda_0, tau_0, a, P, PM, phi_2, t_0, z_0, beta_0)
         d_alpha = alpha[1]-alpha[0]
         scaling = np.sqrt(2*k_0*a)*np.tan(alpha/2)
         illum = scaling*np.exp(-scaling**2)
-        phase = omega_0*time[k] + PM[0] + PM[1]*scaling + \
+        phase = omega_0*time[k] - k_0*z[k]*np.cos(alpha) + \
+                PM[0] + PM[1]*scaling + \
         		PM[2]*scaling**2 + PM[3]*scaling**3 + \
         		PM[4]*scaling**4 + PM[5]*scaling**5 + \
         		PM[6]*scaling**6 + PM[7]*scaling**7 + \
         		PM[8]*scaling**8
         apod = (1/np.cos(alpha/2))**(2)
 
-        integrand1 = np.exp(-1j*k_0*z[k]*np.cos(alpha))
-        integrand2 = np.sin(alpha)**2
+        integrand = np.sin(alpha)**2
 
         corr = np.sqrt(k_0)*k_0*np.sqrt(a)/np.sqrt(2)
 
-        field_temp = np.sum(np.exp(-((phase/omega_0-z[k]/c)/tau)**2)*d_alpha*corr*illum*np.exp(1j*phase)*apod*integrand1*integrand2)
+        field_temp = np.sum(d_alpha*np.exp(-((phase/omega_0)/tau)**2)*corr*illum*np.exp(1j*phase)*apod*integrand)
 
         temp_phase = np.exp(1j*(2*phi_2/(tau_0**4+(2*phi_2)**2))*(time[k]-z[k]/c)**2)
         field_total = Amp*(tau_0/tau)*field_temp*temp_phase
