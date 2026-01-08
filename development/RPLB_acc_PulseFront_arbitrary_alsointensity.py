@@ -1,8 +1,8 @@
 import numpy as np
-from numba import jit, njit
+from numba import jit
 
 @jit(nopython=True)
-def RPLB_acc_NoSTC_arbitrary_alsointensity(lambda_0, tau_0, a0, P, SP, PM, phi_2, t_0, z_0, beta_0):
+def RPLB_acc_PulseFront_arbitrary(lambda_0, tau_0, a, P, SP, PM, PF, phi_2, t_0, z_0, beta_0):
     # initialize constants (SI units)
     c = 2.99792458e8  # speed of light
     m_e = 9.10938356e-31
@@ -13,17 +13,14 @@ def RPLB_acc_NoSTC_arbitrary_alsointensity(lambda_0, tau_0, a0, P, SP, PM, phi_2
     k_0 = omega_0/c
     delta_omega = 2/tau_0
     # amplitude factor
-    SP_norm = np.sum(SP**2)
-    Amp = np.sqrt(8*P/(np.pi*e_0*c*SP_norm))
+    Amp = np.sqrt(8*P/(np.pi*e_0*c))
     # stretched pulse duration
     tau = np.sqrt(tau_0**2 + (2*phi_2/tau_0)**2)
-    # scale size according to higher orders
-    a = a0*(2*np.where(SP)[0].max() + 1)
     
     t_start = t_0/(1-beta_0) + z_0/c
     t_end = +1e5*tau_0
     # number of time steps per laser period
-    n = 50
+    n = (lambda_0/(0.8e-6))*np.maximum(50, np.round(np.sqrt(P*tau_0*k_0/(tau*2*a))/(3e10)))
     num_t = np.int_(np.round(n*(t_end-t_start)/(lambda_0/c)))
     time = np.linspace(t_start, t_end, num_t)
     dt = time[1]-time[0]
@@ -42,7 +39,7 @@ def RPLB_acc_NoSTC_arbitrary_alsointensity(lambda_0, tau_0, a0, P, SP, PM, phi_2
     # do 5th order Adams-Bashforth finite difference method
     for k in range(0, len(time)-1):
         
-        alpha = np.linspace(0, 1.0, np.int(501+10*np.round(np.abs(z[k])/a)))
+        alpha = np.linspace(0, 1.0, np.int_(501+10*np.round(np.abs(z[k])/a)))
         d_alpha = alpha[1]-alpha[0]
         scaling = np.sqrt(2*k_0*a)*np.tan(alpha/2)
         illum = scaling*np.exp(-scaling**2)
@@ -55,17 +52,22 @@ def RPLB_acc_NoSTC_arbitrary_alsointensity(lambda_0, tau_0, a0, P, SP, PM, phi_2
                           (((2*scaling**2)**6 - 42*(2*scaling**2)**5 + 630*(2*scaling**2)**4 - 4200*(2*scaling**2)**3 + 12600*(2*scaling**2)**2 - 15120*(2*scaling**2) + 5040)/720)*SP[6]/np.sqrt(6+1)
         phase = omega_0*time[k] - k_0*z[k]*np.cos(alpha) + \
                 PM[0] + PM[1]*scaling + \
-                PM[2]*scaling**2 + PM[3]*scaling**3 + \
-                PM[4]*scaling**4 + PM[5]*scaling**5 + \
-                PM[6]*scaling**6 + PM[7]*scaling**7 + \
-                PM[8]*scaling**8
+        		PM[2]*scaling**2 + PM[3]*scaling**3 + \
+        		PM[4]*scaling**4 + PM[5]*scaling**5 + \
+        		PM[6]*scaling**6 + PM[7]*scaling**7 + \
+        		PM[8]*scaling**8
+        delay = PF[0]*scaling + \
+                PF[1]*scaling**2 + PF[2]*scaling**3 + \
+                PF[3]*scaling**4 + PF[4]*scaling**5 + \
+                PF[5]*scaling**6 + PF[6]*scaling**7 + \
+                PF[7]*scaling**8
         apod = (1/np.cos(alpha/2))**(2)
 
         integrand = np.sin(alpha)**2
 
         corr = np.sqrt(k_0)*k_0*np.sqrt(a)/np.sqrt(2)
 
-        field_temp = np.sum(d_alpha*np.exp(-(((phase-PM[0])/omega_0)/tau)**2)*corr*illum*spatial_profile*np.exp(1j*phase)*apod*integrand)
+        field_temp = np.sum(d_alpha*np.exp(-(((phase-PM[0])/omega_0 - delay)/tau)**2)*corr*illum*spatial_profile*np.exp(1j*phase)*apod*integrand)
 
         temp_phase = np.exp(1j*(2*phi_2/(tau_0**4+(2*phi_2)**2))*(time[k]-z[k]/c)**2)
         field_total = Amp*(tau_0/tau)*field_temp*temp_phase
@@ -90,7 +92,7 @@ def RPLB_acc_NoSTC_arbitrary_alsointensity(lambda_0, tau_0, a0, P, SP, PM, phi_2
 
         KE[k+1] = ((1/np.sqrt(1-beta[k+1]**2))-1)*m_e*c**2/q_e
         
-        if (time[k] > 300*tau_0 and np.mean(np.abs(np.diff(KE[k-np.int(10*n):k+1]))/(KE[k+1]*dt)) < 1e7):
+        if (time[k] > 300*tau_0 and np.mean(np.abs(np.diff(KE[k-np.int_(10*n):k+1]))/(KE[k+1]*dt)) < 1e7):
             k_stop = k+1
             break
 
