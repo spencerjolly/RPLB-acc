@@ -39,7 +39,7 @@ def RPLB_acc_NoSTC_arbitrary(lambda_0, tau_0, a, P, PM, phi_2, t_0, z_0, beta_0)
     # do 5th order Adams-Bashforth finite difference method
     for k in range(0, len(time)-1):
         
-        alpha = np.linspace(0, np.sqrt(16*2/(k_0*a)), np.int_(501+10*np.round(np.abs(z[k])/a)))
+        alpha = np.linspace(0, np.sqrt(9*2/(k_0*a)), np.int_(201+2*np.round(np.abs(z[k])/a)))
         d_alpha = alpha[1]-alpha[0]
         scaling = np.sqrt(2*k_0*a)*np.tan(alpha/2)
         illum = scaling*np.exp(-scaling**2)
