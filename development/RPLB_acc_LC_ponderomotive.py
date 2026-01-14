@@ -2,7 +2,7 @@ import numpy as np
 from numba import jit
 
 @jit(nopython=True)
-def RPLB_acc_LC_ponderomotive(lambda_0, tau_0, w_0, P, Psi_0, phi_2, t_0, z_0, beta_0, tau_p):
+def RPLB_acc_LC_ponderomotive(lambda_0, tau_0, w_0, P, phi_2, t_0, z_0, beta_0, tau_p):
     # initialize constants (SI units)
     c = 2.99792458e8  # speed of light
     m_e = 9.10938356e-31
@@ -22,7 +22,7 @@ def RPLB_acc_LC_ponderomotive(lambda_0, tau_0, w_0, P, Psi_0, phi_2, t_0, z_0, b
     t_start = t_0/(1-beta_0) + z_0/c
     t_end = +1e5*tau_0
     # number of time steps per laser period
-    n = (lambda_0/(0.8e-6))*np.maximum(1, np.round(np.sqrt(P*tau_0/(tau*w_0**2))/(5e11)))  # empirically chosen resolution based on field strength
+    n = (lambda_0/(0.8e-6))*np.maximum(5, np.round(np.sqrt(P*tau_0/(tau*w_0**2))/(5e11)))  # empirically chosen resolution based on field strength
     num_t = np.int_(np.round(n*(t_end-t_start)/(lambda_0/c)))
     time = np.linspace(t_start, t_end, num_t)
     dt = time[1]-time[0]
@@ -35,6 +35,7 @@ def RPLB_acc_LC_ponderomotive(lambda_0, tau_0, w_0, P, Psi_0, phi_2, t_0, z_0, b
 
     # Set initial conditions
     beta[0] = beta_0
+    KE[0] = ((1/np.sqrt(1-beta[0]**2))-1)*m_e*c**2/q_e
     z[0] = beta_0*c*time[0] + z_0*(1-beta_0)
     k_stop = -1
 

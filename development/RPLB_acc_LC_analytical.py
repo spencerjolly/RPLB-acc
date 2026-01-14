@@ -34,6 +34,7 @@ def RPLB_acc_LC_analytical(lambda_0, tau_0, w_0, P, Psi_0, phi_2, t_0, z_0, beta
 
     # Set initial conditions
     beta[0] = beta_0
+    KE[0] = ((1/np.sqrt(1-beta[0]**2))-1)*m_e*c**2/q_e
     z[0] = beta_0*c*time[0] + z_0*(1-beta_0)
     k_stop = -1
 
