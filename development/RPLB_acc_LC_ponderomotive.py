@@ -15,7 +15,7 @@ def RPLB_acc_LC_ponderomotive(lambda_0, tau_0, w_0, P, phi_2, t_0, z_0, beta_0, 
     z_R = (omega_0*w_0**2)/(2*c)
     # amplitude factor
     Amp = np.sqrt(8*P/(np.pi*e_0*c))
-    Amp2 = 2/(phi_2*delta_omega**2 *z_R**2)
+    Amp2 = np.sqrt(2/np.abs(phi_2))/delta_omega
     # stretched pulse duration
     tau = np.sqrt(tau_0**2 + (2*phi_2/tau_0)**2)
     
@@ -41,11 +41,11 @@ def RPLB_acc_LC_ponderomotive(lambda_0, tau_0, w_0, P, phi_2, t_0, z_0, beta_0, 
 
     #do 5th order Adams-Bashforth finite difference method
     for k in range(0, len(time)-1):
-        I_z = np.exp(-2*(time[k]/(phi_2*delta_omega) - z[k]/(c*phi_2*delta_omega))**2)/(1 + (z[k]*(1/z_R + tau_p/(c*phi_2)) - time[k]*tau_p/phi_2)**2)**2
+        I_z = (1/z_R**2)*np.exp(-2*(time[k]/(phi_2*delta_omega) - z[k]/(c*phi_2*delta_omega))**2)/(1 + (z[k]*(1/z_R + tau_p/(c*phi_2)) - time[k]*tau_p/phi_2)**2)**2
         I_z_deriv1 = -4*((z[k]*(1/z_R + tau_p/(c*phi_2)) - time[k]*tau_p/phi_2)*(1/z_R + tau_p/(c*phi_2))/(1 + (z[k]*(1/z_R + tau_p/(c*phi_2)) - time[k]*tau_p/phi_2)**2))
         I_z_deriv2 = 4*(time[k]/(phi_2*delta_omega) - z[k]/(c*phi_2*delta_omega))/(c*phi_2*delta_omega)
 
-        force = (-q_e**2/(4*m_e*omega_0**2))*(Amp**2 * Amp2)*I_z*(I_z_deriv1 + I_z_deriv2)
+        force = (-q_e**2/(4*m_e*(omega_0 + z[k]/(tau_p*z_R))**2))*(Amp**2 * Amp2**2)*I_z*(I_z_deriv1 + I_z_deriv2)
         deriv2[k] = (force*((1 - beta[k]**2)**(3/2))/(m_e*c))
 
         if k==0:
@@ -66,7 +66,7 @@ def RPLB_acc_LC_ponderomotive(lambda_0, tau_0, w_0, P, phi_2, t_0, z_0, beta_0, 
 
         KE[k+1] = ((1/np.sqrt(1-beta[k+1]**2))-1)*m_e*c**2/q_e
         
-        if (time[k] > 300*tau_0 and np.mean(np.abs(np.diff(KE[k-np.int_(10*n):k+1]))/(KE[k+1]*dt)) < 1e7):
+        if (time[k] > 300*tau_0 and np.mean(np.abs(np.diff(KE[k-np.int_(10*n):k+1]))/(KE[k+1]*dt)) < 1e6):
             k_stop = k+1
             break
 
