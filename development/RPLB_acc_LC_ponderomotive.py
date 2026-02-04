@@ -22,7 +22,7 @@ def RPLB_acc_LC_ponderomotive(lambda_0, tau_0, w_0, P, phi_2, t_0, z_0, beta_0, 
     t_start = t_0/(1-beta_0) + z_0/c
     t_end = +1e5*tau_0
     # number of time steps per laser period
-    n = (lambda_0/(0.8e-6))*np.maximum(5, np.round(np.sqrt(P*tau_0/(tau*w_0**2))/(5e11)))  # empirically chosen resolution based on field strength
+    n = (lambda_0/(0.8e-6))*np.maximum(3, np.round(np.sqrt(P*tau_0/(tau*w_0**2))/(8e11)))  # empirically chosen resolution based on field strength
     num_t = np.int_(np.round(n*(t_end-t_start)/(lambda_0/c)))
     time = np.linspace(t_start, t_end, num_t)
     dt = time[1]-time[0]
