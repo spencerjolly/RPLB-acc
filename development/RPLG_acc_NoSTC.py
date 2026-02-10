@@ -40,8 +40,8 @@ def RPLG_acc_NoSTC(nLG, lambda_0, tau_0, w_0, P, Psi_0, phi_2, t_0, z_0, beta_0)
     #do 5th order Adams-Bashforth finite difference method
     for k in range(0, len(time)-1):
 
-        field_temp1 = (nLG+1)*np.cos(Psi_0+(2*nLG+2)*np.arctan(z[k]/z_R)+omega_0*time[k]-omega_0*z[k]/c)
-        field_temp2 = (nLG)*np.cos(Psi_0+2*nLG*np.arctan(z[k]/z_R)+omega_0*time[k]-omega_0*z[k]/c)
+        field_temp1 = (nLG+1)*np.exp(1j*(Psi_0+(2*nLG+2)*np.arctan(z[k]/z_R)+omega_0*time[k]-omega_0*z[k]/c))
+        field_temp2 = (nLG)*np.exp(1j*(Psi_0+2*nLG*np.arctan(z[k]/z_R)+omega_0*time[k]-omega_0*z[k]/c))
         env_temp = np.exp(-((time[k]-z[k]/c)/tau)**2)/(z_R*(1+(z[k]/z_R)**2))
         temp_phase = np.exp(1j*(2*phi_2/(tau_0**4+(2*phi_2)**2))*(time[k]-z[k]/c)**2)
         field_total = Amp*(tau_0/tau)*(field_temp1 + field_temp2)*env_temp*temp_phase
