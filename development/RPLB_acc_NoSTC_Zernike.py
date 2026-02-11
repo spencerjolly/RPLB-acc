@@ -53,10 +53,9 @@ def RPLB_acc_NoSTC_Zernike(lambda_0, tau_0, a, P, PM, phi_2, t_0, z_0, beta_0):
 
         corr = np.sqrt(k_0)*k_0*np.sqrt(a)/np.sqrt(2)
 
-        field_temp = np.sum(d_alpha*np.exp(-(((phase-PM[0])/omega_0)/tau)**2)*corr*illum*np.exp(1j*phase)*apod*integrand)
+        field_temp = np.sum(d_alpha*np.exp(-((phase-PM[0])/omega_0)**2/(tau_0**2 + 2*1j*phi_2))*corr*illum*np.exp(1j*phase)*apod*integrand)
 
-        temp_phase = np.exp(1j*(2*phi_2/(tau_0**4+(2*phi_2)**2))*(time[k]-z[k]/c)**2)
-        field_total = Amp*(tau_0/tau)*field_temp*temp_phase
+        field_total = Amp*(tau_0/tau)*field_temp
         
         deriv2[k] = (-q_e*np.real(field_total)*((1-beta[k]**2)**(3/2))/(m_e*c))  # Lorentz force in z
 
