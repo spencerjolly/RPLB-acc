@@ -2,7 +2,7 @@ import numpy as np
 from numba import jit
 
 @jit(nopython=True)
-def RPLB_acc_NoSTC_Zernike(lambda_0, tau_0, a, P, PM, phi_2, t_0, z_0, beta_0):
+def RPLB_acc_PulseFront_Zernike(lambda_0, tau_0, a, P, PM, PF, phi_2, t_0, z_0, beta_0):
     # initialize constants (SI units)
     c = 2.99792458e8  # speed of light
     m_e = 9.10938356e-31
@@ -47,13 +47,18 @@ def RPLB_acc_NoSTC_Zernike(lambda_0, tau_0, a, P, PM, phi_2, t_0, z_0, beta_0):
                 PM[1]*np.sqrt(3)*(2*scaling**2 - 1) + \
         		PM[2]*np.sqrt(5)*(6*scaling**4 - 6*scaling**2 + 1) + \
                 PM[3]*np.sqrt(7)*(20*scaling**6 - 30*scaling**4 + 12*scaling**2 - 1)
+        delay = PF[0]*scaling + \
+                PF[1]*scaling**2 + PF[2]*scaling**3 + \
+                PF[3]*scaling**4 + PF[4]*scaling**5 + \
+                PF[5]*scaling**6 + PF[6]*scaling**7 + \
+                PF[7]*scaling**8
         apod = (1/np.cos(alpha/2))**(2)
 
         integrand = np.sin(alpha)**2
 
         corr = np.sqrt(k_0)*k_0*np.sqrt(a)/np.sqrt(2)
 
-        field_temp = np.sum(d_alpha*np.exp(-(((phase-PM[0])/omega_0)/tau)**2)*corr*illum*np.exp(1j*phase)*apod*integrand)
+        field_temp = np.sum(d_alpha*np.exp(-(((phase-PM[0])/omega_0 - delay)/tau)**2)*corr*illum*np.exp(1j*phase)*apod*integrand)
 
         temp_phase = np.exp(1j*(2*phi_2/(tau_0**4+(2*phi_2)**2))*(time[k]-z[k]/c)**2)
         field_total = Amp*(tau_0/tau)*field_temp*temp_phase
