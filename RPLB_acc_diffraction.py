@@ -16,11 +16,31 @@ def RPLB_acc_diffraction(lambda_0, tau_0, a, P, PM_type, PM, PF, phi_2, t_0, z_0
     P = Fourier-limited pulse power in the absence of aberrations or pulse-front delay
     PM_type = type of phase map. 0 = generic polynomial, 1 = Zernike
     PM = phase map
+
+        If generic polynomial:
+        PM[n] is the coefficent of the phase map such that phase = sum(PM[n]*rho^n) from n=0 to 8
+        PM[0] is the CEP, PM[2] is the quadratic phase, PM[4] is the quartic phase, etc.
+
+        If Zernike:
+        PM[n] is the coefficent of the phase map such that phase = sum(PM[n]*Z(2n)0) from n=0 to 3
+        PM[0] is the CEP/piston term Z00, PM[1] is the defocus Z20, PM[2] is the spherical aberration Z40, PM[3] is the second-order spherical aberration Z60
+
     PF = pulse-front delay
-    phi_2 = group-delay dispersion
+
+        PF[n] is the coefficent of the phase map such that delay = sum(PF[n]*rho^(n+1)) from n=0 to 7
+        PF[1] is the classical quadratic pulse-front curvature, for example
+
+    phi_2 = group-delay dispersion [s^2]
     t_0 = initial starting time of the simulation in terms of the pulse peak relative to the electron starting position [s]
     z_0 = electron starting position [m]
     beta_0 = initial electron speed beta=v/c
+
+    Returns
+    -------
+    time = time in a uniformly spaced array from the start to when the electron is no lnger being accelerated [s]
+    z = position of the electron along z as a function of time [m]
+    beta = velocity (beta=v/c) of the electron as a function of time
+    KE = Kinetick energy of the electron as a function of time [eV]
     """
     # initialize constants (SI units)
     c = 2.99792458e8  # speed of light [m/s]
@@ -111,6 +131,7 @@ def RPLB_acc_diffraction(lambda_0, tau_0, a, P, PM_type, PM, PF, phi_2, t_0, z_0
 
         KE[k+1] = ((1/np.sqrt(1-beta[k+1]**2))-1)*m_e*c**2/q_e
         
+        # condition for exiting the loop once the KE is not changing significantly anymore
         if (time[k] > 300*tau_0 and np.mean(np.abs(np.diff(KE[k-np.int_(10*n):k+1]))/(KE[k+1]*dt)) < 1e7):
             k_stop = k+1
             break
