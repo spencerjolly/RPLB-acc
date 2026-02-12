@@ -3,6 +3,23 @@ from numba import jit
 
 @jit(nopython=True)
 def RPLB_acc_NoSTC(lambda_0, tau_0, w_0, P, Psi_0, phi_2, t_0, z_0, beta_0):
+    """
+    Function to accelerate an on-axis electron when under the influence of the electric field of
+    a tightly focused radially-polarized laser beam (RPLB) of ultrashort duration. The electric field
+    is calculated using analytical equations.
+
+    Parameters
+    ----------
+    lambda_0 = central wavelength of the laser pulse [m]
+    tau_0 = Fourier-limited 1/exp(2) pulse duration of the laser pulse [s]
+    w_0 = beam waist at the focal plane [m]
+    P = Fourier-limited pulse power
+    Psi_0 = carrier-to-envelope phase (CEP) [radians]
+    phi_2 = group-delay dispersion [s^2]
+    t_0 = initial starting time of the simulation in terms of the pulse peak relative to the electron starting position [s]
+    z_0 = electron starting position [m]
+    beta_0 = initial electron speed beta=v/c
+    """
     # initialize constants (SI units)
     c = 2.99792458e8  # speed of light
     m_e = 9.10938356e-31

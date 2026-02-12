@@ -5,13 +5,15 @@ from numba import jit
 def RPLB_acc_diffraction(lambda_0, tau_0, a, P, PM_type, PM, PF, phi_2, t_0, z_0, beta_0):
     """
     Function to accelerate an on-axis electron when under the influence of the electric field of
-    a tightly focused radially-polarized laser beam (RPLB) of ultrashort duration.
+    a tightly focused radially-polarized laser beam (RPLB) of ultrashort duration. The electric field
+    is calculated using a vector diffraction integral.
 
     Parameters
     ----------
     lambda_0 = central wavelength of the laser pulse [m]
     tau_0 = Fourier-limited 1/exp(2) pulse duration of the laser pulse [s]
     a = confocal parameter, related to the tightness of focusing
+    P = Fourier-limited pulse power in the absence of aberrations or pulse-front delay
     PM_type = type of phase map. 0 = generic polynomial, 1 = Zernike
     PM = phase map
     PF = pulse-front delay
