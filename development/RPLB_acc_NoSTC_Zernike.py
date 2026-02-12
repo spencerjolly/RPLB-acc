@@ -17,10 +17,10 @@ def RPLB_acc_NoSTC_Zernike(lambda_0, tau_0, a, P, PM, phi_2, t_0, z_0, beta_0):
     # stretched pulse duration
     tau = np.sqrt(tau_0**2 + (2*phi_2/tau_0)**2)
     
-    t_start = t_0 + z_0/(c*(1-beta_0))
+    t_start = t_0/(1-beta_0) + z_0/c
     t_end = +1e5*tau_0
     # number of time steps per laser period
-    n = 50
+    n = (lambda_0/(0.8e-6))*np.maximum(50, np.round(np.sqrt(P*tau_0*k_0/(tau*2*a))/(3e10)))
     num_t = np.int_(np.round(n*(t_end-t_start)/(lambda_0/c)))
     time = np.linspace(t_start, t_end, num_t)
     dt = time[1]-time[0]
@@ -33,7 +33,7 @@ def RPLB_acc_NoSTC_Zernike(lambda_0, tau_0, a, P, PM, phi_2, t_0, z_0, beta_0):
 
     # Set initial conditions
     beta[0] = beta_0
-    z[0] = beta_0*c*time[0] + z_0
+    z[0] = beta_0*c*time[0] + z_0*(1-beta_0)
     k_stop = -1
 
     # do 5th order Adams-Bashforth finite difference method
@@ -77,7 +77,7 @@ def RPLB_acc_NoSTC_Zernike(lambda_0, tau_0, a, P, PM, phi_2, t_0, z_0, beta_0):
 
         KE[k+1] = ((1/np.sqrt(1-beta[k+1]**2))-1)*m_e*c**2/q_e
         
-        if (time[k] > 300*tau_0 and np.mean(np.abs(np.diff(KE[k-np.int(10*n):k+1]))/(KE[k+1]*dt)) < 1e7):
+        if (time[k] > 300*tau_0 and np.mean(np.abs(np.diff(KE[k-np.int_(10*n):k+1]))/(KE[k+1]*dt)) < 1e7):
             k_stop = k+1
             break
 
