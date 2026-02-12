@@ -36,6 +36,8 @@ def RPLB_acc_PulseFront_arbitrary(lambda_0, tau_0, a, P, SP, PM, PF, phi_2, t_0,
     z[0] = beta_0*c*time[0] + z_0*(1-beta_0)
     k_stop = -1
 
+    corr = np.sqrt(k_0)*k_0*np.sqrt(a)/np.sqrt(2)
+
     # do 5th order Adams-Bashforth finite difference method
     for k in range(0, len(time)-1):
         
@@ -64,8 +66,6 @@ def RPLB_acc_PulseFront_arbitrary(lambda_0, tau_0, a, P, SP, PM, PF, phi_2, t_0,
         apod = (1/np.cos(alpha/2))**(2)
 
         integrand = np.sin(alpha)**2
-
-        corr = np.sqrt(k_0)*k_0*np.sqrt(a)/np.sqrt(2)
 
         field_temp = np.sum(d_alpha*np.exp(-((phase-PM[0])/omega_0 - delay)**2/(tau_0**2 + 2*1j*phi_2))*corr*illum*spatial_profile*np.exp(1j*phase)*apod*integrand)
 

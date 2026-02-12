@@ -2,12 +2,29 @@ import numpy as np
 from numba import jit
 
 @jit(nopython=True)
-def RPLB_acc_PulseFront_Zernike(lambda_0, tau_0, a, P, PM, PF, phi_2, t_0, z_0, beta_0):
+def RPLB_acc_diffraction(lambda_0, tau_0, a, P, PM_type, PM, PF, phi_2, t_0, z_0, beta_0):
+    """
+    Function to accelerate an on-axis electron when under the influence of the electric field of
+    a tightly focused radially-polarized laser beam (RPLB) of ultrashort duration.
+
+    Parameters
+    ----------
+    lambda_0 = central wavelength of the laser pulse [m]
+    tau_0 = Fourier-limited 1/exp(2) pulse duration of the laser pulse [s]
+    a = confocal parameter, related to the tightness of focusing
+    PM_type = type of phase map. 0 = generic polynomial, 1 = Zernike
+    PM = phase map
+    PF = pulse-front delay
+    phi_2 = group-delay dispersion
+    t_0 = initial starting time of the simulation in terms of the pulse peak relative to the electron starting position [s]
+    z_0 = electron starting position [m]
+    beta_0 = initial electron speed beta=v/c
+    """
     # initialize constants (SI units)
-    c = 2.99792458e8  # speed of light
-    m_e = 9.10938356e-31
-    q_e = 1.60217662e-19
-    e_0 = 8.85418782e-12
+    c = 2.99792458e8  # speed of light [m/s]
+    m_e = 9.10938356e-31  # electron mass [kg]
+    q_e = 1.60217662e-19  # electron charge [C]
+    e_0 = 8.85418782e-12  # permittivity of free space
     # calculate frequency properties
     omega_0 = 2*np.pi*c/lambda_0
     k_0 = omega_0/c
@@ -45,10 +62,20 @@ def RPLB_acc_PulseFront_Zernike(lambda_0, tau_0, a, P, PM, PF, phi_2, t_0, z_0, 
         d_alpha = alpha[1]-alpha[0]
         scaling = np.sqrt(2*k_0*a)*np.tan(alpha/2)
         illum = scaling*np.exp(-scaling**2)
-        phase = omega_0*time[k] - k_0*z[k]*np.cos(alpha) + PM[0] + \
+
+        if PM_type==0:
+            phase = omega_0*time[k] - k_0*z[k]*np.cos(alpha) + \
+                    PM[0] + PM[1]*scaling + \
+            		PM[2]*scaling**2 + PM[3]*scaling**3 + \
+            		PM[4]*scaling**4 + PM[5]*scaling**5 + \
+            		PM[6]*scaling**6 + PM[7]*scaling**7 + \
+            		PM[8]*scaling**8
+        elif PM_type = 1:
+            phase = omega_0*time[k] - k_0*z[k]*np.cos(alpha) + PM[0] + \
                 PM[1]*np.sqrt(3)*(2*scaling**2 - 1) + \
-        		PM[2]*np.sqrt(5)*(6*scaling**4 - 6*scaling**2 + 1) + \
+                PM[2]*np.sqrt(5)*(6*scaling**4 - 6*scaling**2 + 1) + \
                 PM[3]*np.sqrt(7)*(20*scaling**6 - 30*scaling**4 + 12*scaling**2 - 1)
+
         delay = PF[0]*scaling + \
                 PF[1]*scaling**2 + PF[2]*scaling**3 + \
                 PF[3]*scaling**4 + PF[4]*scaling**5 + \
