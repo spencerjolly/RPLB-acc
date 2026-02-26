@@ -15,10 +15,26 @@ def RPLB_acc_anySTC(lambda_0, tau_0, w_00, P, Psi_0, spec_phase_coeffs, LC_coeff
     w_00 = beam waist at the focal plane at the central frequency [m]
     P = Fourier-limited pulse power
     Psi_0 = carrier-to-envelope phase (CEP) [radians]
-    coeffs ...
+    spec_phase_coeffs = an array of the spectral phase coefficients such that phase = sum(spec_phase_coeffs[n]*delta_omega^n/n!) from n=2
+    LC_coeffs = an array of the longitudinal chromatism coefficients such that z_0 = sum(LC_coeffs[n]*z_R0*delta_omega^n/n!) from n=1
+    g0_coeffs = an array of the coefficients describing the spatio-spectral beam parameter, either as g_0 (len=1) or as a polynomial
     t_0 = initial starting time of the simulation in terms of the pulse peak relative to the electron starting position [s]
     z_0 = electron starting position [m]
     beta_0 = initial electron speed beta=v/c
+
+    Returns
+    -------
+    time = time in a uniformly spaced array from the start to when the electron is no longer being accelerated [s]
+    z = position of the electron along z as a function of time [m]
+    beta = velocity (beta=v/c) of the electron as a function of time
+    KE = Kinetic energy of the electron as a function of time [eV] (technically redundant with beta, but nice to have as a check)
+
+    Details
+    -------
+    The assumptions in this script are that it is a fundamental RPLB in terms of intensity, but most other parameters are allowed
+    to vary with frequency, which allows for significant space-time aberration modeling. It is assumed that there are no effects
+    that break cylindircal symmetry (no aberrations like tilt or astigmatism and no space-time effects like spatial chirp) since
+    that would require 2D or 3D modeling of the field and electron trajectory.
     """
     # initialize constants (SI units)
     c = 2.99792458e8 #speed of light

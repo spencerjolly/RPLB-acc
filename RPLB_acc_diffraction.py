@@ -4,6 +4,8 @@ from numba import jit
 @jit(nopython=True)
 def RPLB_acc_diffraction(lambda_0, tau_0, a, P, PM_type, PM, PF, phi_2, t_0, z_0, beta_0):
     """
+    Summary
+    -------
     Function to accelerate an on-axis electron when under the influence of the electric field of
     a tightly focused radially-polarized laser beam (RPLB) of ultrashort duration. The electric field
     is calculated using a vector diffraction integral.
@@ -37,10 +39,18 @@ def RPLB_acc_diffraction(lambda_0, tau_0, a, P, PM_type, PM, PF, phi_2, t_0, z_0
 
     Returns
     -------
-    time = time in a uniformly spaced array from the start to when the electron is no lnger being accelerated [s]
+    time = time in a uniformly spaced array from the start to when the electron is no longer being accelerated [s]
     z = position of the electron along z as a function of time [m]
     beta = velocity (beta=v/c) of the electron as a function of time
-    KE = Kinetick energy of the electron as a function of time [eV]
+    KE = Kinetic energy of the electron as a function of time [eV] (technically redundant with beta, but nice to have as a check)
+
+    Details
+    -------
+    The assumption in this script is that it assumes that the illumination on the focusing optic is the fundamental RPLB profile
+    and that the characteristic waist of that profile w_i is independent of frequency. The only possible imposed space-time coupling
+    is the pulse-front distortions modeled by the input parameter PF. It is assumed that there are no effects
+    that break cylindircal symmetry (no aberrations like tilt or astigmatism and no space-time effects like angular dispersion) since
+    that would require 2D or 3D modeling of the field and electron trajectory.
     """
     # initialize constants (SI units)
     c = 2.99792458e8  # speed of light [m/s]

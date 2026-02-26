@@ -4,9 +4,11 @@ from numba import jit
 @jit(nopython=True)
 def RPLB_acc_NoSTC(lambda_0, tau_0, w_0, P, Psi_0, phi_2, t_0, z_0, beta_0):
     """
+    Summary
+    -------
     Function to accelerate an on-axis electron when under the influence of the electric field of
     a tightly focused radially-polarized laser beam (RPLB) of ultrashort duration. The electric field
-    is calculated using analytical equations.
+    is calculated using analytical equations based on solutions to the wave equation near the focus.
 
     Parameters
     ----------
@@ -19,6 +21,18 @@ def RPLB_acc_NoSTC(lambda_0, tau_0, w_0, P, Psi_0, phi_2, t_0, z_0, beta_0):
     t_0 = initial starting time of the simulation in terms of the pulse peak relative to the electron starting position [s]
     z_0 = electron starting position [m]
     beta_0 = initial electron speed beta=v/c
+
+    Returns
+    -------
+    time = time in a uniformly spaced array from the start to when the electron is no longer being accelerated [s]
+    z = position of the electron along z as a function of time [m]
+    beta = velocity (beta=v/c) of the electron as a function of time
+    KE = Kinetic energy of the electron as a function of time [eV] (technically redundant with beta, but nice to have as a check)
+
+    Details
+    -------
+    The assumptions in this script are that the laser pulse has no imposed space-time couplings, and also it assumes that the
+    Rayleigh range z_R is independent of frequency.
     """
     # initialize constants (SI units)
     c = 2.99792458e8  # speed of light

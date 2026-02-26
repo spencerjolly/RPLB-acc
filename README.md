@@ -28,21 +28,21 @@ The general model used to produce the fields simulated here is from Ref. \[4]. T
 
 **References:**
 
-\[1] L. J. Wong and Franz X. Kärtner, Direct acceleration of an electron in infinite vacuum by a pulsed radially-polarized laser beam, Optics Express **18**, 25035-25051 (2010). https://www.osapublishing.org/oe/fulltext.cfm?uri=oe-18-24-25035\&id=208171 (open access)
+\[1] L. J. Wong and Franz X. Kärtner, Direct acceleration of an electron in infinite vacuum by a pulsed radially-polarized laser beam, Optics Express **18**, 25035-25051 (2010). https://doi.org/10.1364/OE.18.025035 (open access)
 
-\[2] S. W. Jolly, Influence of longitudinal chromatism on vacuum acceleration by intense radially polarized laser beams, Optics Letters **44**, 1833–1836 (2019). https://www.osapublishing.org/ol/abstract.cfm?uri=ol-44-7-1833 (https://arxiv.org/abs/1811.09412)
+\[2] S. W. Jolly, Influence of longitudinal chromatism on vacuum acceleration by intense radially polarized laser beams, Optics Letters **44**, 1833–1836 (2019). https://doi.org/10.1364/OL.44.001833 (https://arxiv.org/abs/1811.09412)
 
-\[3] S. W. Jolly, On the importance of frequency-dependent beam parameters for vacuum acceleration with few-cycle radially-polarized laser beams, Optics Letters **45**, 3865–3868 (2020). https://www.osapublishing.org/ol/abstract.cfm?uri=ol-45-14-3865 (https://arxiv.org/abs/1912.04026)
+\[3] S. W. Jolly, On the importance of frequency-dependent beam parameters for vacuum acceleration with few-cycle radially-polarized laser beams, Optics Letters **45**, 3865–3868 (2020). https://doi.org/10.1364/OL.394493 (https://arxiv.org/abs/1912.04026)
 
-\[4] Y. I. Salamin, Fields of a radially polarized Gaussian laser beam beyond the paraxial approximation, Optics Letters **17**, 2619–2621 (2006). https://opg.optica.org/ol/abstract.cfm?uri=ol-31-17-2619
+\[4] Y. I. Salamin, Fields of a radially polarized Gaussian laser beam beyond the paraxial approximation, Optics Letters **17**, 2619–2621 (2006). https://doi.org/10.1364/OL.31.002619
 
-\[5] S. W. Jolly, Focused fields of ultrashort radially polarized laser pulses having low-order spatiotemporal couplings, Physical Review A 103, 033512 (2021). https://journals.aps.org/pra/abstract/10.1103/PhysRevA.103.033512 (https://arxiv.org/abs/2012.02729)
+\[5] S. W. Jolly, Focused fields of ultrashort radially polarized laser pulses having low-order spatiotemporal couplings, Physical Review A 103, 033512 (2021). https://doi.org/10.1103/PhysRevA.103.033512 (https://arxiv.org/abs/2012.02729)
 
 \[6] A. April, Ultrashort, Strongly Focused Laser Pulses in Free Space, chapter 16 in the book "Coherence and Ultrashort Pulse Laser Emission", 355-382 (2010). https://www.intechopen.com/chapters/12677
 
-\[7] S. W. Jolly \& M. A. Porras, Analytical fields of ultrashort radially polarized laser beams with spatial chirp, Journal of the Optical Society of America B **41**, 577–584 (2024).
+\[7] S. W. Jolly \& M. A. Porras, Analytical fields of ultrashort radially polarized laser beams with spatial chirp, Journal of the Optical Society of America B **41**, 577–584 (2024). https://doi.org/10.1364/JOSAB.515089
 
-\[8] J. Powell, S. W. Jolly, S. Vallières, F. Fillion-Gourdeau, S. Payeur, S. Fourmaux, M. Lytova, M. Piché, H. Ibrahim, S. MacLean, \& F. Légaré, Relativistic Electrons from Vacuum Laser Acceleration Using Tightly Focused Radially Polarized Beams, Physical Review Letters **133**, 155001 (2024).
+\[8] J. Powell, S. W. Jolly, S. Vallières, F. Fillion-Gourdeau, S. Payeur, S. Fourmaux, M. Lytova, M. Piché, H. Ibrahim, S. MacLean, \& F. Légaré, Relativistic Electrons from Vacuum Laser Acceleration Using Tightly Focused Radially Polarized Beams, Physical Review Letters **133**, 155001 (2024). https://doi.org/10.1103/PhysRevLett.133.155001 (https://arxiv.org/abs/2402.08009)
 
 **Acknowlegements:**
 
