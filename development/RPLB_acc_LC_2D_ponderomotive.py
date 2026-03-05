@@ -103,7 +103,7 @@ def RPLB_acc_LC_2D_ponderomotive(lambda_0, tau_0, w_0, P, phi_2, t_0, z_0, r_0, 
         gamma[k+1] = 1/np.sqrt(1-(v_z[k+1]**2+v_r[k+1]**2)/c**2)
         KE[k+1] = (gamma[k+1]-1)*m_e*c**2/q_e
            
-        if (time[k] > 300*tau_0 and np.mean(np.abs(np.diff(KE[k-np.int_(10*n):k+1]))/(KE[k+1]*dt)) < 1e7):
+        if (time[k] > 300*tau_0 and np.mean(np.abs(np.diff(KE[k-np.int_(10*n):k+1]))/(KE[k+1]*dt)) < 1e6):
             k_stop = k+1
             break
 
